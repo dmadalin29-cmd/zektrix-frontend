@@ -24,11 +24,13 @@ const ReferralPage = lazy(() => import("./pages/ReferralPage"));
 const CartPage = lazy(() => import("./pages/CartPage"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
 const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
+const LuckyWheelPage = lazy(() => import("./pages/LuckyWheelPage"));
 
 // Global Components
 import InstallPrompt from "./components/InstallPrompt";
 import CookieConsent from "./components/CookieConsent";
 import ScrollToTop from "./components/ScrollToTop";
+import LiveChat from "./components/LiveChat";
 
 // Loading fallback component
 const PageLoader = () => (
@@ -87,6 +89,7 @@ const AppRouter = () => {
                 <Route path="/terms" element={<TermsPage />} />
                 <Route path="/payment/success" element={<PaymentSuccessPage />} />
                 <Route path="/payment/failed" element={<PaymentFailedPage />} />
+                <Route path="/lucky-wheel" element={<LuckyWheelPage />} />
 
                 {/* Protected Routes */}
                 <Route
@@ -164,6 +167,7 @@ function App() {
                         <BrowserRouter>
                             <ScrollToTop />
                             <AppRouter />
+                            <LiveChat />
                         </BrowserRouter>
                         <Toaster position="top-right" richColors closeButton />
                         <InstallPrompt />

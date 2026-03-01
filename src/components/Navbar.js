@@ -24,6 +24,7 @@ const Navbar = () => {
 
     const navLinks = [
         { href: '/competitions', label: t('nav_competitions') },
+        { href: '/lucky-wheel', label: '🎰 Roata' },
         { href: '/winners', label: t('nav_winners') },
         { href: '/search', label: t('nav_find_tickets') },
         { href: '/faq', label: t('nav_faq') },

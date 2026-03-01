@@ -88,6 +88,15 @@ const CompetitionCard = ({ competition, featured = false }) => {
                         </Badge>
                     </div>
                 )}
+
+                {/* Flash Sale Badge */}
+                {competition.flash_sale?.active && (
+                    <div className="absolute top-4 right-4 animate-pulse">
+                        <Badge className="bg-orange-500 text-white border-none shadow-lg shadow-orange-500/30">
+                            ⚡ -{competition.flash_sale.discount_percent}% FLASH
+                        </Badge>
+                    </div>
+                )}
             </div>
 
             {/* Progress bar */}
@@ -120,7 +129,18 @@ const CompetitionCard = ({ competition, featured = false }) => {
                         <span>{isRomanian ? 'rămase' : 'left'}</span>
                     </div>
                     <div className="price-display text-xl">
-                        RON {competition.ticket_price.toFixed(2)}
+                        {competition.flash_sale?.active ? (
+                            <>
+                                <span className="line-through text-muted-foreground text-sm mr-2">
+                                    RON {competition.flash_sale.original_price?.toFixed(2)}
+                                </span>
+                                <span className="text-orange-500">
+                                    RON {competition.flash_sale.flash_price?.toFixed(2)}
+                                </span>
+                            </>
+                        ) : (
+                            <>RON {competition.ticket_price.toFixed(2)}</>
+                        )}
                     </div>
                 </div>
 

@@ -290,6 +290,27 @@ const AdminPage = () => {
         }
     };
 
+    const startFlashSale = async (compId) => {
+        const duration = prompt('Durată Flash Sale (ore):', '2');
+        if (!duration) return;
+        const discount = prompt('Discount (%):', '20');
+        if (!discount) return;
+        
+        try {
+            await axios.post(`${API}/admin/flash-sale`, {
+                competition_id: compId,
+                duration_hours: parseInt(duration),
+                discount_percent: parseInt(discount)
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success(`⚡ Flash Sale activat! -${discount}% pentru ${duration} ore`);
+            fetchAll();
+        } catch (error) {
+            toast.error(getErrorMessage(error, 'Flash Sale failed'));
+        }
+    };
+
     // User handlers
     const handleUserSubmit = async (e) => {
         e.preventDefault();
@@ -521,6 +542,22 @@ const AdminPage = () => {
                                                         <Button variant="outline" size="sm" onClick={() => openEditComp(comp)} data-testid={`edit-comp-${comp.competition_id}`}>
                                                             <Edit className="w-4 h-4" />
                                                         </Button>
+                                                        {comp.status === 'active' && !comp.flash_sale?.active && (
+                                                            <Button 
+                                                                variant="outline" 
+                                                                size="sm" 
+                                                                onClick={() => startFlashSale(comp.competition_id)}
+                                                                className="border-orange-500/30 text-orange-500 hover:bg-orange-500/10"
+                                                                data-testid={`flash-sale-${comp.competition_id}`}
+                                                            >
+                                                                ⚡ Flash Sale
+                                                            </Button>
+                                                        )}
+                                                        {comp.flash_sale?.active && (
+                                                            <Badge className="bg-orange-500/20 text-orange-500 border-orange-500/30">
+                                                                ⚡ FLASH -{comp.flash_sale.discount_percent}%
+                                                            </Badge>
+                                                        )}
                                                         {comp.status === 'active' && comp.competition_type === 'classic' && (
                                                             <>
                                                                 <Button variant="outline" size="sm" onClick={() => handleEndComp(comp.competition_id)} className="border-yellow-500/30 text-yellow-500" data-testid={`end-comp-${comp.competition_id}`}>
