@@ -104,6 +104,56 @@ const HomePage = () => {
                 </div>
             </section>
 
+            {/* LIVE Section - TikTok */}
+            <section className="py-12 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border-y border-primary/20">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex items-center gap-4">
+                            <div className="relative">
+                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center animate-pulse-glow">
+                                    <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                                    </svg>
+                                </div>
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping" />
+                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full" />
+                            </div>
+                            <div>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded uppercase animate-pulse">
+                                        {t('live_now') || 'LIVE ACUM'}
+                                    </span>
+                                </div>
+                                <h3 className="text-xl font-bold text-white">{t('live_section_title') || 'Suntem LIVE!'}</h3>
+                                <p className="text-sm text-muted-foreground">{t('live_section_desc') || 'Urmărește-ne pe TikTok pentru extrageri și surprize'}</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <a
+                                href="https://www.tiktok.com/@x67.uk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn-secondary flex items-center gap-2 text-sm"
+                                data-testid="watch-live-btn"
+                            >
+                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+                                </svg>
+                                {t('watch_live') || 'Urmărește LIVE'}
+                            </a>
+                            <a
+                                href="https://www.tiktok.com/@x67.uk"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-white/70 hover:text-white transition-colors text-sm font-medium"
+                            >
+                                @x67.uk
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* Featured Competitions */}
             <section className="py-24 bg-background">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
