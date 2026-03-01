@@ -587,30 +587,30 @@ const AdminPage = () => {
 
                             {/* Tickets Tab */}
                             <TabsContent value="tickets">
-                                <h2 className="text-2xl font-bold mb-6">View All Tickets</h2>
+                                <h2 className="text-2xl font-bold mb-6">{isRomanian ? 'Vezi Toate Biletele' : 'View All Tickets'}</h2>
                                 <Card className="glass border-white/10 mb-6">
                                     <CardContent className="p-4">
                                         <div className="flex flex-wrap gap-4">
                                             <Select value={ticketFilter.competition_id} onValueChange={(v) => setTicketFilter(prev => ({ ...prev, competition_id: v === 'all' ? '' : v }))}>
                                                 <SelectTrigger className="w-[250px] bg-muted border-white/10" data-testid="ticket-filter-comp">
-                                                    <SelectValue placeholder="Filter by Competition" />
+                                                    <SelectValue placeholder={isRomanian ? 'Filtrează după Competiție' : 'Filter by Competition'} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="all">All Competitions</SelectItem>
+                                                    <SelectItem value="all">{isRomanian ? 'Toate Competițiile' : 'All Competitions'}</SelectItem>
                                                     {competitions.map((c) => (
                                                         <SelectItem key={c.competition_id} value={c.competition_id}>{c.title}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
                                             <Input
-                                                placeholder="Search by username"
+                                                placeholder={isRomanian ? 'Caută după nume' : 'Search by name'}
                                                 value={ticketFilter.username}
                                                 onChange={(e) => setTicketFilter(prev => ({ ...prev, username: e.target.value }))}
                                                 className="w-[200px] input-modern"
                                                 data-testid="ticket-filter-username"
                                             />
                                             <Button onClick={fetchTickets} data-testid="search-tickets-btn">
-                                                <Search className="w-4 h-4 mr-2" /> Search
+                                                <Search className="w-4 h-4 mr-2" /> {isRomanian ? 'Caută' : 'Search'}
                                             </Button>
                                         </div>
                                     </CardContent>
@@ -618,27 +618,53 @@ const AdminPage = () => {
                                 {tickets.length > 0 ? (
                                     <Card className="glass border-white/10">
                                         <CardContent className="p-0">
-                                            <div className="overflow-x-auto max-h-[500px]">
+                                            <div className="overflow-x-auto max-h-[600px]">
                                                 <table className="w-full table-modern">
-                                                    <thead className="sticky top-0 bg-card">
+                                                    <thead className="sticky top-0 bg-card z-10">
                                                         <tr className="border-b border-white/10">
-                                                            <th>Ticket #</th>
-                                                            <th>Competition</th>
-                                                            <th>User</th>
-                                                            <th>Purchased</th>
+                                                            <th>{isRomanian ? 'Bilet #' : 'Ticket #'}</th>
+                                                            <th>{isRomanian ? 'Competiție' : 'Competition'}</th>
+                                                            <th>{isRomanian ? 'Nume Complet' : 'Full Name'}</th>
+                                                            <th>{isRomanian ? 'Telefon' : 'Phone'}</th>
+                                                            <th>Email</th>
+                                                            <th>{isRomanian ? 'Data' : 'Date'}</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {tickets.map((t) => (
-                                                            <tr key={t.ticket_id}>
+                                                            <tr key={t.ticket_id} className="hover:bg-white/5">
                                                                 <td><span className="ticket-badge">#{t.ticket_number}</span></td>
-                                                                <td>{t.competition_title || t.competition_id}</td>
-                                                                <td>{t.username || t.user_id}</td>
-                                                                <td className="text-muted-foreground">{new Date(t.purchased_at).toLocaleDateString()}</td>
+                                                                <td className="font-medium">{t.competition_title || t.competition_id}</td>
+                                                                <td>
+                                                                    <div>
+                                                                        <p className="font-medium">{t.full_name || t.username}</p>
+                                                                        <p className="text-xs text-muted-foreground">@{t.username}</p>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    {t.phone ? (
+                                                                        <a href={`tel:${t.phone}`} className="text-primary hover:underline">{t.phone}</a>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">-</span>
+                                                                    )}
+                                                                </td>
+                                                                <td>
+                                                                    {t.email ? (
+                                                                        <a href={`mailto:${t.email}`} className="text-primary hover:underline text-sm">{t.email}</a>
+                                                                    ) : (
+                                                                        <span className="text-muted-foreground">-</span>
+                                                                    )}
+                                                                </td>
+                                                                <td className="text-muted-foreground text-sm">{new Date(t.purchased_at).toLocaleString('ro-RO')}</td>
                                                             </tr>
                                                         ))}
                                                     </tbody>
                                                 </table>
+                                            </div>
+                                            <div className="p-4 border-t border-white/10 bg-muted/50">
+                                                <p className="text-sm text-muted-foreground">
+                                                    {isRomanian ? `Total: ${tickets.length} bilete` : `Total: ${tickets.length} tickets`}
+                                                </p>
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -646,7 +672,7 @@ const AdminPage = () => {
                                     <Card className="glass border-white/10">
                                         <CardContent className="p-8 text-center">
                                             <Ticket className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-                                            <p className="text-muted-foreground">Click Search to view tickets</p>
+                                            <p className="text-muted-foreground">{isRomanian ? 'Apasă Caută pentru a vedea biletele' : 'Click Search to view tickets'}</p>
                                         </CardContent>
                                     </Card>
                                 )}

@@ -23,6 +23,9 @@ const LoginPage = () => {
     const [loginPassword, setLoginPassword] = useState('');
 
     // Register form
+    const [regFirstName, setRegFirstName] = useState('');
+    const [regLastName, setRegLastName] = useState('');
+    const [regPhone, setRegPhone] = useState('');
     const [regUsername, setRegUsername] = useState('');
     const [regEmail, setRegEmail] = useState('');
     const [regPassword, setRegPassword] = useState('');
@@ -46,21 +49,25 @@ const LoginPage = () => {
 
     const handleRegister = async (e) => {
         e.preventDefault();
+        if (!regFirstName || !regLastName || !regPhone) {
+            toast.error('Te rugăm să completezi toate câmpurile');
+            return;
+        }
         if (regPassword !== regConfirmPassword) {
-            toast.error('Passwords do not match');
+            toast.error('Parolele nu se potrivesc');
             return;
         }
         if (regPassword.length < 6) {
-            toast.error('Password must be at least 6 characters');
+            toast.error('Parola trebuie să aibă minim 6 caractere');
             return;
         }
         setLoading(true);
         try {
-            await register(regUsername, regEmail, regPassword);
+            await register(regUsername, regEmail, regPassword, regFirstName, regLastName, regPhone);
             toast.success(t('success') + '!');
             navigate(from, { replace: true });
         } catch (error) {
-            toast.error(error.response?.data?.detail || 'Registration failed');
+            toast.error(error.response?.data?.detail || 'Înregistrare eșuată');
         } finally {
             setLoading(false);
         }
@@ -143,6 +150,48 @@ const LoginPage = () => {
 
                             <TabsContent value="register">
                                 <form onSubmit={handleRegister} className="space-y-4">
+                                    {/* Nume și Prenume pe același rând */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="reg-firstname">Prenume *</Label>
+                                            <Input
+                                                id="reg-firstname"
+                                                type="text"
+                                                placeholder="Ion"
+                                                value={regFirstName}
+                                                onChange={(e) => setRegFirstName(e.target.value)}
+                                                className="input-modern"
+                                                required
+                                                data-testid="register-firstname-input"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="reg-lastname">Nume *</Label>
+                                            <Input
+                                                id="reg-lastname"
+                                                type="text"
+                                                placeholder="Popescu"
+                                                value={regLastName}
+                                                onChange={(e) => setRegLastName(e.target.value)}
+                                                className="input-modern"
+                                                required
+                                                data-testid="register-lastname-input"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="reg-phone">Telefon *</Label>
+                                        <Input
+                                            id="reg-phone"
+                                            type="tel"
+                                            placeholder="+40 7XX XXX XXX"
+                                            value={regPhone}
+                                            onChange={(e) => setRegPhone(e.target.value)}
+                                            className="input-modern"
+                                            required
+                                            data-testid="register-phone-input"
+                                        />
+                                    </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="reg-username">{t('username')}</Label>
                                         <div className="relative">
