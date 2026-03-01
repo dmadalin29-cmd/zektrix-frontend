@@ -1019,31 +1019,36 @@ const AdminPage = () => {
                                                             ? 'Trimite notificare când o competiție depășește 75% vândut.'
                                                             : 'Notify when competition exceeds 75% sold.'}
                                                     </p>
-                                                    <Select onValueChange={async (compId) => {
-                                                        if (!compId) return;
-                                                        try {
-                                                            const res = await axios.post(`${API}/admin/notify-75-percent/${compId}`, {}, {
-                                                                headers: { Authorization: `Bearer ${token}` }
-                                                            });
-                                                            toast.success(res.data.message);
-                                                        } catch (error) {
-                                                            toast.error(getErrorMessage(error, 'Eroare la trimitere'));
-                                                        }
-                                                    }}>
-                                                        <SelectTrigger className="bg-muted border-white/10">
-                                                            <SelectValue placeholder={isRomanian ? 'Alege competiția' : 'Select competition'} />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {competitions.filter(c => c.status === 'active').map((c) => {
-                                                                const percent = Math.round((c.sold_tickets / c.max_tickets) * 100);
-                                                                return (
-                                                                    <SelectItem key={c.competition_id} value={c.competition_id}>
-                                                                        {c.title} ({percent}%)
-                                                                    </SelectItem>
-                                                                );
-                                                            })}
-                                                        </SelectContent>
-                                                    </Select>
+                                                    {competitions.length === 0 ? (
+                                                        <p className="text-xs text-muted-foreground italic">Nu există competiții</p>
+                                                    ) : (
+                                                        <Select onValueChange={async (compId) => {
+                                                            if (!compId) return;
+                                                            try {
+                                                                const res = await axios.post(`${API}/admin/notify-75-percent/${compId}`, {}, {
+                                                                    headers: { Authorization: `Bearer ${token}` }
+                                                                });
+                                                                toast.success(res.data.message);
+                                                            } catch (error) {
+                                                                toast.error(getErrorMessage(error, 'Eroare la trimitere'));
+                                                            }
+                                                        }}>
+                                                            <SelectTrigger className="bg-muted border-white/10">
+                                                                <SelectValue placeholder={isRomanian ? 'Alege competiția' : 'Select competition'} />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                {competitions.map((c) => {
+                                                                    const percent = Math.round((c.sold_tickets / Math.max(c.max_tickets, 1)) * 100);
+                                                                    const statusLabel = c.status === 'active' ? '' : ` [${c.status}]`;
+                                                                    return (
+                                                                        <SelectItem key={c.competition_id} value={c.competition_id}>
+                                                                            {c.title} ({percent}%){statusLabel}
+                                                                        </SelectItem>
+                                                                    );
+                                                                })}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    )}
                                                 </div>
                                             </div>
                                         </CardContent>
