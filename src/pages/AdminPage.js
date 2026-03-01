@@ -18,7 +18,7 @@ import axios from 'axios';
 import { 
     Shield, LayoutDashboard, Trophy, Users, Ticket, Plus, Edit, Trash2, 
     Loader2, ArrowLeft, Zap, Clock, Search, DollarSign, Award, CheckCircle,
-    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff
+    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff, Sparkles, Wand2
 } from 'lucide-react';
 
 // TikTok Icon
@@ -77,6 +77,9 @@ const AdminPage = () => {
     // Live Status
     const [liveStatus, setLiveStatus] = useState({ isLive: false, message: '' });
     const [liveMessage, setLiveMessage] = useState('');
+    
+    // AI Generation
+    const [generatingAI, setGeneratingAI] = useState(false);
 
     useEffect(() => {
         if (!isAdmin) {
@@ -86,6 +89,49 @@ const AdminPage = () => {
         fetchAll();
         fetchLiveStatus();
     }, [isAdmin, navigate]);
+    
+    // AI Content Generation
+    const generateAIContent = async () => {
+        if (!compForm.title) {
+            toast.error(isRomanian ? 'Introdu mai întâi titlul competiției' : 'Enter competition title first');
+            return;
+        }
+        
+        setGeneratingAI(true);
+        try {
+            const response = await axios.post(`${API}/admin/generate-ai-content`, 
+                { title: compForm.title, category: 'tech' },
+                { headers: { Authorization: `Bearer ${token}` }}
+            );
+            
+            const data = response.data;
+            
+            if (data.description) {
+                setCompForm(prev => ({ ...prev, description: data.description }));
+            }
+            
+            if (data.qualification_question) {
+                const q = data.qualification_question;
+                setCompForm(prev => ({
+                    ...prev,
+                    qual_question: q.question || '',
+                    qual_option1: q.options?.[0] || '',
+                    qual_option2: q.options?.[1] || '',
+                    qual_option3: q.options?.[2] || q.options?.[1] || '',
+                    qual_correct: (q.correct_answer || 0).toString()
+                }));
+            }
+            
+            toast.success(data.ai_generated 
+                ? (isRomanian ? '✨ Conținut generat cu AI!' : '✨ AI content generated!')
+                : (isRomanian ? 'Întrebare generată automat' : 'Question auto-generated')
+            );
+        } catch (error) {
+            toast.error(isRomanian ? 'Eroare la generare AI' : 'AI generation failed');
+        } finally {
+            setGeneratingAI(false);
+        }
+    };
     
     const fetchLiveStatus = async () => {
         try {
@@ -759,6 +805,34 @@ const AdminPage = () => {
                         <DialogTitle className="text-xl font-bold">{editingComp ? 'Editează Competiția' : 'Creează Competiție Nouă'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCompSubmit} className="space-y-6 py-4">
+                        {/* AI Generation Button */}
+                        <div className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-500/30 rounded-xl p-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-violet-500/20 flex items-center justify-center">
+                                        <Sparkles className="w-5 h-5 text-violet-400" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold text-violet-300">{isRomanian ? 'Generare cu AI' : 'AI Generation'}</h4>
+                                        <p className="text-xs text-muted-foreground">{isRomanian ? 'Generează descriere și întrebare automat' : 'Auto-generate description and question'}</p>
+                                    </div>
+                                </div>
+                                <Button 
+                                    type="button" 
+                                    onClick={generateAIContent}
+                                    disabled={generatingAI || !compForm.title}
+                                    className="bg-violet-600 hover:bg-violet-700 text-white"
+                                    data-testid="generate-ai-btn"
+                                >
+                                    {generatingAI ? (
+                                        <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> {isRomanian ? 'Generez...' : 'Generating...'}</>
+                                    ) : (
+                                        <><Wand2 className="w-4 h-4 mr-2" /> {isRomanian ? 'Generează cu AI' : 'Generate with AI'}</>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
+
                         {/* Basic Info */}
                         <div className="space-y-4">
                             <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Informații de Bază</h3>

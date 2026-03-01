@@ -53,7 +53,7 @@ const TermsPage = () => {
                                     <p>
                                         Competițiile noastre promoționale includ întotdeauna o întrebare de cunoștințe sau un element de skill și o metodă 
                                         alternativă de participare gratuită („rută poștală"). <strong>Nu este necesară nicio achiziție pentru a participa, 
-                                        iar efectuarea unei plăți nu crește șansele de a fi selectat ca și câștigător.</strong>
+                                        iar efectuarea unei plăți nu crește șansele de a fi selectat ca premiant.</strong>
                                     </p>
                                     <p className="text-sm italic">
                                         Apple nu este sponsorul acestei promoții și nu este implicată în niciun fel în acest concurs. 
@@ -126,7 +126,7 @@ const TermsPage = () => {
                                     </div>
                                     <p className="text-sm bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4">
                                         <strong>⚠️ Important:</strong> Achiziția de produse digitale sau credit este opțională și nu oferă niciun avantaj și nicio 
-                                        probabilitate mai mare de a fi selectat câștigător față de participarea gratuită prin poștă.
+                                        probabilitate mai mare de a fi selectat premiant față de participarea gratuită prin poștă.
                                     </p>
                                     <p>
                                         Intrările incomplete, ilizibile, trimise târziu sau cu instrucțiuni nerespectate (inclusiv răspunsuri greșite la întrebarea 
@@ -191,19 +191,19 @@ const TermsPage = () => {
                             <CardContent className="p-6">
                                 <h2 className="text-xl font-bold mb-4 flex items-center gap-3">
                                     <span className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary font-bold">7</span>
-                                    Selecția Câștigătorilor, Verificare și Corectitudine
+                                    Selecția Premianților, Verificare și Corectitudine
                                 </h2>
                                 <div className="text-muted-foreground space-y-4">
                                     <p>
-                                        Selecția câștigătorilor respectă regulile publicate pe pagina fiecărei competiții și include numai participările 
+                                        Selecția premianților respectă regulile publicate pe pagina fiecărei competiții și include numai participările 
                                         care au urmat corect instrucțiunile și, după caz, au răspuns corect la întrebarea de calificare.
                                     </p>
                                     <p className="font-bold text-white">
-                                        Nicio plată, sold al contului sau tip de participare (printr-un produs digital sau rută poștală) nu crește probabilitatea de a fi selectat câștigător.
+                                        Nicio plată, sold al contului sau tip de participare (printr-un produs digital sau rută poștală) nu crește probabilitatea de a fi selectat premiant.
                                     </p>
                                     <ul className="space-y-2">
-                                        <li>• Procedurile de desemnare a câștigătorilor sunt concepute pentru a fi transparente și verificabile și pot include transmisii publice, înregistrări, observatori independenți sau instrumente auditate.</li>
-                                        <li>• Câștigătorii sunt anunțați prin e-mail și în cont și trebuie să răspundă în maximum 14 zile.</li>
+                                        <li>• Procedurile de desemnare a premianților sunt concepute pentru a fi transparente și verificabile și pot include transmisii publice, înregistrări, observatori independenți sau instrumente auditate.</li>
+                                        <li>• Premianții sunt anunțați prin e-mail și în cont și trebuie să răspundă în maximum 14 zile.</li>
                                         <li>• Nerespectarea termenului sau refuzul / imposibilitatea de a furniza documentele solicitate duce la pierderea premiului și alegerea unui alt participant.</li>
                                     </ul>
                                 </div>
@@ -221,7 +221,7 @@ const TermsPage = () => {
                                     <p>
                                         Premiile fizice sunt expediate după verificarea identității și semnarea documentelor de acceptare. 
                                         Transportul standard este suportat de noi, însă taxele vamale, impozitele locale, înmatricularea sau asigurarea 
-                                        revin în sarcina câștigătorului, dacă nu se precizează altfel pe pagina competiției.
+                                        revin în sarcina premiantului, dacă nu se precizează altfel pe pagina competiției.
                                     </p>
                                     <p>
                                         Premiile în bani sunt transferate în contul bancar verificat, în moneda anunțată pe pagina competiției. 

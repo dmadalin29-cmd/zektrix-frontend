@@ -77,7 +77,7 @@ const AnalyticsDashboard = () => {
             bg: 'bg-secondary/20'
         },
         { 
-            label: isRomanian ? 'Total Câștigători' : 'Total Winners', 
+            label: isRomanian ? 'Total Premianți' : 'Total Winners', 
             value: analytics?.total_winners || 0, 
             icon: Trophy, 
             color: 'text-primary',

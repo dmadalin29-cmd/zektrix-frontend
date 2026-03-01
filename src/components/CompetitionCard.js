@@ -25,7 +25,7 @@ const CompetitionCard = ({ competition, featured = false }) => {
 
     const getCategoryLabel = () => {
         const labels = {
-            'instant_wins': isRomanian ? 'Câștig Instant' : 'Instant Win',
+            'instant_wins': isRomanian ? 'Premiu Instant' : 'Instant Prize',
             'tech': isRomanian ? 'Tehnologie' : 'Tech',
             'cash': isRomanian ? 'Bani' : 'Cash',
             'cars': isRomanian ? 'Mașini' : 'Cars',

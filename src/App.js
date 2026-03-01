@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import "@/App.css";
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -6,26 +6,35 @@ import { LanguageProvider } from "./context/LanguageContext";
 import { CartProvider } from "./context/CartContext";
 import { Toaster } from "./components/ui/sonner";
 
-// Pages
+// Pages - Eagerly loaded (critical path)
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import AuthCallback from "./pages/AuthCallback";
-import DashboardPage from "./pages/DashboardPage";
-import CompetitionsPage from "./pages/CompetitionsPage";
-import CompetitionDetailPage from "./pages/CompetitionDetailPage";
-import WinnersPage from "./pages/WinnersPage";
-import SearchTicketsPage from "./pages/SearchTicketsPage";
-import FAQPage from "./pages/FAQPage";
-import TermsPage from "./pages/TermsPage";
-import AdminPage from "./pages/AdminPage";
-import ReferralPage from "./pages/ReferralPage";
-import CartPage from "./pages/CartPage";
-import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import PaymentFailedPage from "./pages/PaymentFailedPage";
+
+// Pages - Lazy loaded (better performance)
+const DashboardPage = lazy(() => import("./pages/DashboardPage"));
+const CompetitionsPage = lazy(() => import("./pages/CompetitionsPage"));
+const CompetitionDetailPage = lazy(() => import("./pages/CompetitionDetailPage"));
+const WinnersPage = lazy(() => import("./pages/WinnersPage"));
+const SearchTicketsPage = lazy(() => import("./pages/SearchTicketsPage"));
+const FAQPage = lazy(() => import("./pages/FAQPage"));
+const TermsPage = lazy(() => import("./pages/TermsPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const ReferralPage = lazy(() => import("./pages/ReferralPage"));
+const CartPage = lazy(() => import("./pages/CartPage"));
+const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
+const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
 
 // Global Components
 import InstallPrompt from "./components/InstallPrompt";
 import CookieConsent from "./components/CookieConsent";
+
+// Loading fallback component
+const PageLoader = () => (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+    </div>
+);
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -62,84 +71,86 @@ const AppRouter = () => {
     }
 
     return (
-        <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/auth/callback" element={<AuthCallback />} />
-            <Route path="/competitions" element={<CompetitionsPage />} />
-            <Route path="/competitions/:id" element={<CompetitionDetailPage />} />
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/winners" element={<WinnersPage />} />
-            <Route path="/search" element={<SearchTicketsPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="/payment/success" element={<PaymentSuccessPage />} />
-            <Route path="/payment/failed" element={<PaymentFailedPage />} />
+        <Suspense fallback={<PageLoader />}>
+            <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<HomePage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/auth/callback" element={<AuthCallback />} />
+                <Route path="/competitions" element={<CompetitionsPage />} />
+                <Route path="/competitions/:id" element={<CompetitionDetailPage />} />
+                <Route path="/cart" element={<CartPage />} />
+                <Route path="/winners" element={<WinnersPage />} />
+                <Route path="/search" element={<SearchTicketsPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/terms" element={<TermsPage />} />
+                <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                <Route path="/payment/failed" element={<PaymentFailedPage />} />
 
-            {/* Protected Routes */}
-            <Route
-                path="/dashboard"
-                element={
-                    <ProtectedRoute>
-                        <DashboardPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/dashboard/tickets"
-                element={
-                    <ProtectedRoute>
-                        <DashboardPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/dashboard/wallet"
-                element={
-                    <ProtectedRoute>
-                        <DashboardPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/dashboard/history"
-                element={
-                    <ProtectedRoute>
-                        <DashboardPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/dashboard/referral"
-                element={
-                    <ProtectedRoute>
-                        <ReferralPage />
-                    </ProtectedRoute>
-                }
-            />
-            <Route
-                path="/referral"
-                element={
-                    <ProtectedRoute>
-                        <ReferralPage />
-                    </ProtectedRoute>
-                }
-            />
+                {/* Protected Routes */}
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/tickets"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/wallet"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/history"
+                    element={
+                        <ProtectedRoute>
+                            <DashboardPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/dashboard/referral"
+                    element={
+                        <ProtectedRoute>
+                            <ReferralPage />
+                        </ProtectedRoute>
+                    }
+                />
+                <Route
+                    path="/referral"
+                    element={
+                        <ProtectedRoute>
+                            <ReferralPage />
+                        </ProtectedRoute>
+                    }
+                />
 
-            {/* Admin Routes */}
-            <Route
-                path="/admin"
-                element={
-                    <ProtectedRoute adminOnly>
-                        <AdminPage />
-                    </ProtectedRoute>
-                }
-            />
+                {/* Admin Routes */}
+                <Route
+                    path="/admin"
+                    element={
+                        <ProtectedRoute adminOnly>
+                            <AdminPage />
+                        </ProtectedRoute>
+                    }
+                />
 
-            {/* Catch all - redirect to home */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+                {/* Catch all - redirect to home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </Suspense>
     );
 };
 

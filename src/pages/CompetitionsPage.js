@@ -33,7 +33,7 @@ const CompetitionsPage = () => {
 
     const categories = [
         { id: 'all', label: isRomanian ? 'Toate' : 'All', icon: Sparkles },
-        { id: 'instant_wins', label: isRomanian ? 'Câștig Instant' : 'Instant Wins', icon: Zap },
+        { id: 'instant_wins', label: isRomanian ? 'Premiu Instant' : 'Instant Wins', icon: Zap },
         { id: 'tech', label: isRomanian ? 'Tehnologie' : 'Tech', icon: Monitor },
         { id: 'cash', label: isRomanian ? 'Bani' : 'Cash', icon: Banknote },
         { id: 'cars', label: isRomanian ? 'Mașini' : 'Cars', icon: Car },
@@ -70,12 +70,12 @@ const CompetitionsPage = () => {
                             {isRomanian ? 'Competiții Active' : 'Live Competitions'}
                         </Badge>
                         <h1 className="text-4xl md:text-6xl font-black tracking-tighter mb-4">
-                            {isRomanian ? 'Câștigă ' : 'Win '}
+                            {isRomanian ? 'Descoperă ' : 'Discover '}
                             <span className="gradient-text">{isRomanian ? 'Premii Incredibile' : 'Amazing Prizes'}</span>
                         </h1>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                             {isRomanian 
-                                ? 'Alege competiția ta și intră în cursa pentru premii extraordinare. Fiecare bilet este o șansă!'
+                                ? 'Alege competiția ta și intră în cursa pentru premii extraordinare. Fiecare bilet este o participare!'
                                 : 'Choose your competition and enter the race for extraordinary prizes. Every ticket is a chance!'
                             }
                         </p>
@@ -159,7 +159,7 @@ const CompetitionsPage = () => {
                                         {competitions.filter(c => c.competition_type === 'instant_win').length}
                                     </p>
                                     <p className="text-sm text-muted-foreground mt-1">
-                                        {isRomanian ? 'Câștig Instant' : 'Instant Wins'}
+                                        {isRomanian ? 'Premiu Instant' : 'Instant Wins'}
                                     </p>
                                 </div>
                             </div>

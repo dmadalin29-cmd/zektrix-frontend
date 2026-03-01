@@ -7,6 +7,7 @@ import { Button } from '../components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
 import { Menu, User, LogOut, LayoutDashboard, Wallet, Ticket, Shield, Globe, ShoppingCart } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 // TikTok Icon Component
 const TikTokIcon = ({ className }) => (
@@ -105,6 +106,9 @@ const Navbar = () => {
                             )}
                         </Button>
                     </Link>
+
+                    {/* Notification Bell */}
+                    <NotificationBell />
 
                     {isAuthenticated ? (
                         <>

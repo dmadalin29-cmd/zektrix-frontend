@@ -113,7 +113,7 @@ const ReferralPage = () => {
                         <h1 className="text-4xl md:text-5xl font-black tracking-tighter mb-4">
                             {isRomanian ? 'Invită ' : 'Invite '} 
                             <span className="gradient-text">{isRomanian ? 'Prieteni' : 'Friends'}</span>
-                            {isRomanian ? ' & Câștigă' : ' & Earn'}
+                            {isRomanian ? ' & Primește Bonus' : ' & Get Bonus'}
                         </h1>
                         <p className="text-muted-foreground max-w-xl mx-auto">
                             {isRomanian 
@@ -154,7 +154,7 @@ const ReferralPage = () => {
                                 </div>
                                 <p className="text-3xl font-bold text-secondary">RON {referralData?.total_earned || 0}</p>
                                 <p className="text-sm text-muted-foreground">
-                                    {isRomanian ? 'Total Câștigat' : 'Total Earned'}
+                                    {isRomanian ? 'Total Primit' : 'Total Earned'}
                                 </p>
                             </CardContent>
                         </Card>
@@ -325,7 +325,7 @@ const ReferralPage = () => {
                                     <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-3">
                                         <span className="text-xl font-bold text-secondary">3</span>
                                     </div>
-                                    <h4 className="font-bold mb-2">{isRomanian ? 'Câștigați Amândoi' : 'Both Earn'}</h4>
+                                    <h4 className="font-bold mb-2">{isRomanian ? 'Primiți Amândoi' : 'Both Earn'}</h4>
                                     <p className="text-sm text-muted-foreground">
                                         {isRomanian 
                                             ? 'Tu și prietenul primești RON 5 bonus!'
