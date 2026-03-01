@@ -15,13 +15,34 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        // Try to restore user from localStorage on initial load
+        const savedUser = localStorage.getItem('user');
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
     const [loading, setLoading] = useState(true);
-    const [token, setToken] = useState(localStorage.getItem('token'));
+    const [token, setToken] = useState(() => localStorage.getItem('token'));
+
+    const saveAuth = (newToken, userData) => {
+        if (newToken) {
+            localStorage.setItem('token', newToken);
+            setToken(newToken);
+        }
+        if (userData) {
+            localStorage.setItem('user', JSON.stringify(userData));
+            setUser(userData);
+        }
+    };
+
+    const clearAuth = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        setToken(null);
+        setUser(null);
+    };
 
     const checkAuth = useCallback(async () => {
-        // CRITICAL: If returning from OAuth callback, skip the /me check.
-        // AuthCallback will exchange the session_id and establish the session first.
+        // Skip if OAuth callback
         const searchParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash?.replace('#', ''));
         
@@ -31,31 +52,38 @@ export const AuthProvider = ({ children }) => {
         }
 
         const storedToken = localStorage.getItem('token');
+        const storedUser = localStorage.getItem('user');
+        
         if (!storedToken) {
             setLoading(false);
             return;
         }
 
+        // Set token immediately from storage
+        setToken(storedToken);
+        
+        // If we have cached user data, use it immediately
+        if (storedUser) {
+            try {
+                setUser(JSON.parse(storedUser));
+            } catch (e) {
+                console.warn('Failed to parse stored user');
+            }
+        }
+
+        // Then verify with server in background
         try {
             const response = await axios.get(`${API}/auth/me`, {
-                headers: { Authorization: `Bearer ${storedToken}` },
-                withCredentials: true
+                headers: { Authorization: `Bearer ${storedToken}` }
             });
-            setUser(response.data);
-            setToken(storedToken);
+            // Update with fresh data from server
+            saveAuth(storedToken, response.data);
         } catch (error) {
-            // Only clear token on 401 (unauthorized) errors
-            // Network errors or other issues should not log the user out
-            if (error.response && error.response.status === 401) {
-                localStorage.removeItem('token');
-                setUser(null);
-                setToken(null);
-            } else {
-                // For network errors, keep the token and try to use cached data
-                console.warn('Auth check failed, but keeping session:', error.message);
-                // Still set token so protected routes work
-                setToken(storedToken);
+            if (error.response?.status === 401) {
+                // Token is truly invalid
+                clearAuth();
             }
+            // For network errors, keep using cached data
         } finally {
             setLoading(false);
         }
@@ -68,9 +96,7 @@ export const AuthProvider = ({ children }) => {
     const login = async (email, password) => {
         const response = await axios.post(`${API}/auth/login`, { email, password });
         const { token: newToken, user: userData } = response.data;
-        localStorage.setItem('token', newToken);
-        setToken(newToken);
-        setUser(userData);
+        saveAuth(newToken, userData);
         return userData;
     };
 
@@ -84,71 +110,50 @@ export const AuthProvider = ({ children }) => {
             phone: phone
         });
         const { token: newToken, user: userData } = response.data;
-        localStorage.setItem('token', newToken);
-        setToken(newToken);
-        setUser(userData);
+        saveAuth(newToken, userData);
         return userData;
     };
 
-    const loginWithGoogle = () => {
-        // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
-        const redirectUrl = window.location.origin + '/auth/callback';
-        window.location.href = `https://auth.emergentagent.com/?redirect=${encodeURIComponent(redirectUrl)}`;
-    };
-
-    const processGoogleCallback = async (sessionId) => {
-        const response = await axios.get(`${API}/auth/session?session_id=${sessionId}`, {
-            withCredentials: true
-        });
+    const loginWithGoogle = async (sessionId) => {
+        const response = await axios.post(`${API}/auth/google/exchange`, { session_id: sessionId });
         const { token: newToken, user: userData } = response.data;
-        localStorage.setItem('token', newToken);
-        setToken(newToken);
-        setUser(userData);
+        saveAuth(newToken, userData);
         return userData;
     };
 
-    const logout = async () => {
-        try {
-            await axios.post(`${API}/auth/logout`, {}, {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true
-            });
-        } catch (error) {
-            // Ignore logout errors
-        }
-        localStorage.removeItem('token');
-        setToken(null);
-        setUser(null);
+    const logout = () => {
+        clearAuth();
     };
 
     const refreshUser = async () => {
         if (!token) return;
         try {
             const response = await axios.get(`${API}/auth/me`, {
-                headers: { Authorization: `Bearer ${token}` },
-                withCredentials: true
+                headers: { Authorization: `Bearer ${token}` }
             });
-            setUser(response.data);
+            saveAuth(token, response.data);
         } catch (error) {
-            // Ignore
+            console.error('Failed to refresh user');
         }
     };
 
-    const value = {
-        user,
-        token,
-        loading,
-        login,
-        register,
-        loginWithGoogle,
-        processGoogleCallback,
-        logout,
-        refreshUser,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === 'admin'
-    };
+    const isAdmin = user?.role === 'admin';
+    const isAuthenticated = !!token && !!user;
 
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={{
+            user,
+            token,
+            loading,
+            isAdmin,
+            isAuthenticated,
+            login,
+            register,
+            loginWithGoogle,
+            logout,
+            refreshUser
+        }}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
-
-export default AuthContext;

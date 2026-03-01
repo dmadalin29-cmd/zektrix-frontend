@@ -2,23 +2,47 @@
 <html lang="ro">
     <head>
         <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-        <meta name="theme-color" content="#030014" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+        <meta name="theme-color" content="#0a0614" />
         <meta name="description" content="Zektrix UK - Platformă de competiții cu premii extraordinare. Participă acum!" />
+        
+        <!-- iOS PWA -->
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Zektrix" />
+        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="192x192" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="512x512" href="/icon-512.png" />
+        
+        <!-- Android PWA -->
         <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="application-name" content="Zektrix" />
+        
+        <!-- Cache Control -->
         <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta http-equiv="Pragma" content="no-cache" />
         <meta http-equiv="Expires" content="0" />
+        
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        
         <title>Zektrix UK - Participă la Competiții Exclusive</title>
+        
+        <!-- iOS Safe Area CSS -->
+        <style>
+            :root {
+                --sat: env(safe-area-inset-top);
+                --sar: env(safe-area-inset-right);
+                --sab: env(safe-area-inset-bottom);
+                --sal: env(safe-area-inset-left);
+            }
+            body {
+                padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+            }
+        </style>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>

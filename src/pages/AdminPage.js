@@ -18,7 +18,7 @@ import axios from 'axios';
 import { 
     Shield, LayoutDashboard, Trophy, Users, Ticket, Plus, Edit, Trash2, 
     Loader2, ArrowLeft, Zap, Clock, Search, DollarSign, Award, CheckCircle,
-    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff, Sparkles, Wand2
+    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff, Sparkles, Wand2, MessageCircle
 } from 'lucide-react';
 
 // TikTok Icon
@@ -80,6 +80,9 @@ const AdminPage = () => {
     
     // AI Generation
     const [generatingAI, setGeneratingAI] = useState(false);
+    
+    // Chat Messages
+    const [chatMessages, setChatMessages] = useState([]);
 
     useEffect(() => {
         if (!isAdmin) {
@@ -88,6 +91,7 @@ const AdminPage = () => {
         }
         fetchAll();
         fetchLiveStatus();
+        fetchChatMessages();
     }, [isAdmin, navigate]);
     
     // AI Content Generation
@@ -171,6 +175,17 @@ const AdminPage = () => {
             toast.error('Failed to update message');
         }
     };
+    
+    const fetchChatMessages = async () => {
+        try {
+            const response = await axios.get(`${API}/admin/chat/messages`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setChatMessages(response.data);
+        } catch (error) {
+            console.error('Failed to fetch chat messages');
+        }
+    };
 
     const fetchAll = async () => {
         setLoading(true);
@@ -198,7 +213,7 @@ const AdminPage = () => {
             let url = `${API}/admin/tickets`;
             const params = new URLSearchParams();
             if (ticketFilter.competition_id) params.append('competition_id', ticketFilter.competition_id);
-            if (ticketFilter.username) params.append('username', ticketFilter.username);
+            if (ticketFilter.username) params.append('search', ticketFilter.username);
             if (params.toString()) url += `?${params.toString()}`;
             
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
@@ -441,6 +456,9 @@ const AdminPage = () => {
                                 <TabsTrigger value="settings" data-testid="admin-tab-settings">
                                     <Settings className="w-4 h-4 mr-2" /> {isRomanian ? 'Setări' : 'Settings'}
                                 </TabsTrigger>
+                                <TabsTrigger value="chat" data-testid="admin-tab-chat">
+                                    <MessageCircle className="w-4 h-4 mr-2" /> Chat
+                                </TabsTrigger>
                             </TabsList>
 
                             {/* Analytics Tab */}
@@ -640,10 +658,10 @@ const AdminPage = () => {
                                                 </SelectContent>
                                             </Select>
                                             <Input
-                                                placeholder={isRomanian ? 'Caută după nume' : 'Search by name'}
+                                                placeholder={isRomanian ? 'Caută după nume, email sau telefon' : 'Search by name, email or phone'}
                                                 value={ticketFilter.username}
                                                 onChange={(e) => setTicketFilter(prev => ({ ...prev, username: e.target.value }))}
-                                                className="w-[200px] input-modern"
+                                                className="w-[280px] input-modern"
                                                 data-testid="ticket-filter-username"
                                             />
                                             <Button onClick={fetchTickets} data-testid="search-tickets-btn">
@@ -854,6 +872,67 @@ const AdminPage = () => {
                                             </p>
                                         </CardContent>
                                     </Card>
+                                </div>
+                            </TabsContent>
+
+                            {/* Chat Messages Tab */}
+                            <TabsContent value="chat">
+                                <div className="space-y-6">
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-2xl font-bold">{isRomanian ? 'Mesaje Suport' : 'Support Messages'}</h2>
+                                        <Button onClick={fetchChatMessages} variant="outline">
+                                            <RefreshCw className="w-4 h-4 mr-2" /> Refresh
+                                        </Button>
+                                    </div>
+                                    
+                                    {chatMessages.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {chatMessages.map((msg) => (
+                                                <Card key={msg.message_id} className="glass border-white/10">
+                                                    <CardContent className="p-4">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                                                <User className="w-5 h-5 text-primary" />
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center gap-2 mb-2">
+                                                                    <span className="font-bold">{msg.username}</span>
+                                                                    <Badge variant="outline" className="text-xs">
+                                                                        {msg.status === 'pending' ? '🟡 Pending' : '✅ Replied'}
+                                                                    </Badge>
+                                                                    <span className="text-xs text-muted-foreground ml-auto">
+                                                                        {new Date(msg.created_at).toLocaleString('ro-RO')}
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-sm bg-muted p-3 rounded-lg">{msg.message}</p>
+                                                                <div className="mt-3 flex gap-2">
+                                                                    <Button 
+                                                                        size="sm" 
+                                                                        variant="outline"
+                                                                        onClick={() => {
+                                                                            const user = users.find(u => u.user_id === msg.user_id);
+                                                                            if (user?.email) {
+                                                                                window.open(`mailto:${user.email}?subject=Re: Mesajul tău pe Zektrix&body=Salut ${msg.username},%0A%0ARăspuns la mesajul tău:%0A"${msg.message}"%0A%0A`);
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        📧 Răspunde pe Email
+                                                                    </Button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <Card className="glass border-white/10">
+                                            <CardContent className="p-8 text-center">
+                                                <MessageCircle className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                                                <p className="text-muted-foreground">{isRomanian ? 'Nu sunt mesaje noi de la utilizatori' : 'No new messages from users'}</p>
+                                            </CardContent>
+                                        </Card>
+                                    )}
                                 </div>
                             </TabsContent>
                         </Tabs>
