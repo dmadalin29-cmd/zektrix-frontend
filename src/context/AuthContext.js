@@ -22,7 +22,10 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = useCallback(async () => {
         // CRITICAL: If returning from OAuth callback, skip the /me check.
         // AuthCallback will exchange the session_id and establish the session first.
-        if (window.location.hash?.includes('session_id=')) {
+        const searchParams = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash?.replace('#', ''));
+        
+        if (searchParams.has('session_id') || hashParams.has('session_id')) {
             setLoading(false);
             return;
         }
@@ -41,9 +44,18 @@ export const AuthProvider = ({ children }) => {
             setUser(response.data);
             setToken(storedToken);
         } catch (error) {
-            localStorage.removeItem('token');
-            setUser(null);
-            setToken(null);
+            // Only clear token on 401 (unauthorized) errors
+            // Network errors or other issues should not log the user out
+            if (error.response && error.response.status === 401) {
+                localStorage.removeItem('token');
+                setUser(null);
+                setToken(null);
+            } else {
+                // For network errors, keep the token and try to use cached data
+                console.warn('Auth check failed, but keeping session:', error.message);
+                // Still set token so protected routes work
+                setToken(storedToken);
+            }
         } finally {
             setLoading(false);
         }

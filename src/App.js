@@ -28,6 +28,7 @@ const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
 // Global Components
 import InstallPrompt from "./components/InstallPrompt";
 import CookieConsent from "./components/CookieConsent";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Loading fallback component
 const PageLoader = () => (
@@ -161,6 +162,7 @@ function App() {
                 <CartProvider>
                     <div className="App dark">
                         <BrowserRouter>
+                            <ScrollToTop />
                             <AppRouter />
                         </BrowserRouter>
                         <Toaster position="top-right" richColors closeButton />
