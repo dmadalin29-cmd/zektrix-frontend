@@ -1,4 +1,4 @@
-const CACHE_NAME = 'zektrix-v1';
+const CACHE_NAME = 'zektrix-v2-march2026';
 const urlsToCache = [
   '/',
   '/index.html',
