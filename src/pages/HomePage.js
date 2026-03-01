@@ -16,20 +16,23 @@ const API = `${BACKEND_URL}/api`;
 
 const HomePage = () => {
     const { isAuthenticated } = useAuth();
-    const { t } = useLanguage();
+    const { t, isRomanian } = useLanguage();
     const [competitions, setCompetitions] = useState([]);
     const [winners, setWinners] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [liveStatus, setLiveStatus] = useState({ isLive: false, message: '' });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [compsRes, winnersRes] = await Promise.all([
+                const [compsRes, winnersRes, liveRes] = await Promise.all([
                     axios.get(`${API}/competitions?status=active`),
-                    axios.get(`${API}/winners`)
+                    axios.get(`${API}/winners`),
+                    axios.get(`${API}/settings/live-status`).catch(() => ({ data: { isLive: false } }))
                 ]);
                 setCompetitions(compsRes.data.slice(0, 6));
                 setWinners(winnersRes.data.slice(0, 4));
+                setLiveStatus(liveRes.data);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
@@ -104,28 +107,46 @@ const HomePage = () => {
                 </div>
             </section>
 
-            {/* LIVE Section - TikTok */}
-            <section className="py-12 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 border-y border-primary/20">
+            {/* LIVE Section - TikTok - Dynamic */}
+            <section className={`py-12 border-y ${liveStatus.isLive ? 'bg-gradient-to-r from-red-500/20 via-primary/10 to-red-500/20 border-red-500/30' : 'bg-gradient-to-r from-primary/5 via-muted/10 to-primary/5 border-white/10'}`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="flex items-center gap-4">
                             <div className="relative">
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center animate-pulse-glow">
-                                    <svg className="w-8 h-8 text-white" viewBox="0 0 24 24" fill="currentColor">
+                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${liveStatus.isLive ? 'bg-gradient-to-br from-red-500 to-primary animate-pulse-glow' : 'bg-muted/50'}`}>
+                                    <svg className={`w-8 h-8 ${liveStatus.isLive ? 'text-white' : 'text-muted-foreground'}`} viewBox="0 0 24 24" fill="currentColor">
                                         <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
                                     </svg>
                                 </div>
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping" />
-                                <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full" />
+                                {liveStatus.isLive && (
+                                    <>
+                                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping" />
+                                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full" />
+                                    </>
+                                )}
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 mb-1">
-                                    <span className="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded uppercase animate-pulse">
-                                        {t('live_now') || 'LIVE ACUM'}
-                                    </span>
+                                    {liveStatus.isLive ? (
+                                        <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full uppercase animate-pulse">
+                                            🔴 LIVE
+                                        </span>
+                                    ) : (
+                                        <span className="px-3 py-1 bg-muted text-muted-foreground text-xs font-bold rounded-full uppercase">
+                                            OFFLINE
+                                        </span>
+                                    )}
                                 </div>
-                                <h3 className="text-xl font-bold text-white">{t('live_section_title') || 'Suntem LIVE!'}</h3>
-                                <p className="text-sm text-muted-foreground">{t('live_section_desc') || 'Urmărește-ne pe TikTok pentru extrageri și surprize'}</p>
+                                <h3 className="text-xl font-bold text-white">
+                                    {liveStatus.isLive 
+                                        ? (isRomanian ? 'Suntem LIVE!' : "We're LIVE!") 
+                                        : (isRomanian ? 'Offline - Revenim în curând!' : 'Offline - Back soon!')}
+                                </h3>
+                                <p className="text-sm text-muted-foreground">
+                                    {liveStatus.message || (liveStatus.isLive 
+                                        ? (isRomanian ? 'Urmărește-ne pe TikTok pentru extrageri și surprize' : 'Watch us on TikTok for draws and surprises')
+                                        : (isRomanian ? 'Urmărește-ne pe TikTok să fii notificat când revenim' : 'Follow us on TikTok to be notified when we return'))}
+                                </p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -133,22 +154,17 @@ const HomePage = () => {
                                 href="https://www.tiktok.com/@x67digital.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="btn-secondary flex items-center gap-2 text-sm"
+                                className={`flex items-center gap-2 text-sm px-6 py-3 rounded-full font-bold transition-all ${liveStatus.isLive ? 'btn-secondary text-black' : 'btn-outline'}`}
                                 data-testid="watch-live-btn"
                             >
                                 <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
                                 </svg>
-                                {t('watch_live') || 'Urmărește LIVE'}
+                                {liveStatus.isLive 
+                                    ? (isRomanian ? 'Urmărește LIVE' : 'Watch LIVE') 
+                                    : (isRomanian ? 'Urmărește pe TikTok' : 'Follow on TikTok')}
                             </a>
-                            <a
-                                href="https://www.tiktok.com/@x67digital.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-white/70 hover:text-white transition-colors text-sm font-medium"
-                            >
-                                @x67digital.com
-                            </a>
+                            <span className="text-white/70 text-sm font-medium">@x67digital.com</span>
                         </div>
                     </div>
                 </div>

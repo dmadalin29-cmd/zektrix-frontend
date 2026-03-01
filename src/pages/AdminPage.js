@@ -18,8 +18,15 @@ import axios from 'axios';
 import { 
     Shield, LayoutDashboard, Trophy, Users, Ticket, Plus, Edit, Trash2, 
     Loader2, ArrowLeft, Zap, Clock, Search, DollarSign, Award, CheckCircle,
-    XCircle, User, RefreshCw, BarChart3
+    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff
 } from 'lucide-react';
+
+// TikTok Icon
+const TikTokIcon = ({ className }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
+    </svg>
+);
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -66,6 +73,10 @@ const AdminPage = () => {
 
     // Filters
     const [ticketFilter, setTicketFilter] = useState({ competition_id: '', username: '' });
+    
+    // Live Status
+    const [liveStatus, setLiveStatus] = useState({ isLive: false, message: '' });
+    const [liveMessage, setLiveMessage] = useState('');
 
     useEffect(() => {
         if (!isAdmin) {
@@ -73,7 +84,47 @@ const AdminPage = () => {
             return;
         }
         fetchAll();
+        fetchLiveStatus();
     }, [isAdmin, navigate]);
+    
+    const fetchLiveStatus = async () => {
+        try {
+            const response = await axios.get(`${API}/settings/live-status`);
+            setLiveStatus(response.data);
+            setLiveMessage(response.data.message || '');
+        } catch (error) {
+            console.error('Failed to fetch live status');
+        }
+    };
+    
+    const toggleLiveStatus = async () => {
+        try {
+            const newStatus = !liveStatus.isLive;
+            await axios.put(`${API}/admin/live-status`, 
+                { isLive: newStatus, message: liveMessage },
+                { headers: { Authorization: `Bearer ${token}` }}
+            );
+            setLiveStatus({ isLive: newStatus, message: liveMessage });
+            toast.success(newStatus 
+                ? (isRomanian ? 'Acum ești LIVE!' : "You're now LIVE!") 
+                : (isRomanian ? 'Live oprit' : 'Live stopped'));
+        } catch (error) {
+            toast.error('Failed to update live status');
+        }
+    };
+    
+    const updateLiveMessage = async () => {
+        try {
+            await axios.put(`${API}/admin/live-status`, 
+                { isLive: liveStatus.isLive, message: liveMessage },
+                { headers: { Authorization: `Bearer ${token}` }}
+            );
+            setLiveStatus(prev => ({ ...prev, message: liveMessage }));
+            toast.success(isRomanian ? 'Mesaj actualizat!' : 'Message updated!');
+        } catch (error) {
+            toast.error('Failed to update message');
+        }
+    };
 
     const fetchAll = async () => {
         setLoading(true);
@@ -319,6 +370,9 @@ const AdminPage = () => {
                                 </TabsTrigger>
                                 <TabsTrigger value="winners" data-testid="admin-tab-winners">
                                     <Award className="w-4 h-4 mr-2" /> {t('admin_winners')}
+                                </TabsTrigger>
+                                <TabsTrigger value="settings" data-testid="admin-tab-settings">
+                                    <Settings className="w-4 h-4 mr-2" /> {isRomanian ? 'Setări' : 'Settings'}
                                 </TabsTrigger>
                             </TabsList>
 
@@ -585,6 +639,112 @@ const AdminPage = () => {
                                             </CardContent>
                                         </Card>
                                     ))}
+                                </div>
+                            </TabsContent>
+                            
+                            {/* Settings Tab */}
+                            <TabsContent value="settings">
+                                <div className="space-y-8">
+                                    <h2 className="text-2xl font-bold">{isRomanian ? 'Setări' : 'Settings'}</h2>
+                                    
+                                    {/* Live Status Section */}
+                                    <Card className="glass border-white/10">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-3">
+                                                <TikTokIcon className="w-6 h-6" />
+                                                {isRomanian ? 'Status TikTok LIVE' : 'TikTok LIVE Status'}
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-6">
+                                            {/* Live Toggle */}
+                                            <div className="flex items-center justify-between p-6 rounded-2xl bg-gradient-to-r from-primary/10 to-secondary/10 border border-white/10">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${liveStatus.isLive ? 'bg-gradient-to-br from-red-500 to-primary animate-pulse' : 'bg-muted'}`}>
+                                                        {liveStatus.isLive ? (
+                                                            <Wifi className="w-8 h-8 text-white" />
+                                                        ) : (
+                                                            <WifiOff className="w-8 h-8 text-muted-foreground" />
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-bold">
+                                                            {liveStatus.isLive 
+                                                                ? (isRomanian ? '🔴 LIVE ACUM!' : '🔴 LIVE NOW!') 
+                                                                : (isRomanian ? 'Offline' : 'Offline')}
+                                                        </h3>
+                                                        <p className="text-sm text-muted-foreground">
+                                                            {isRomanian 
+                                                                ? 'Apasă butonul pentru a activa/dezactiva statusul LIVE pe site'
+                                                                : 'Click button to toggle LIVE status on website'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <Button 
+                                                    className={liveStatus.isLive ? 'bg-red-500 hover:bg-red-600' : 'btn-primary'}
+                                                    onClick={toggleLiveStatus}
+                                                    data-testid="toggle-live-btn"
+                                                >
+                                                    {liveStatus.isLive 
+                                                        ? (isRomanian ? 'Oprește LIVE' : 'Stop LIVE') 
+                                                        : (isRomanian ? 'Pornește LIVE' : 'Go LIVE')}
+                                                </Button>
+                                            </div>
+                                            
+                                            {/* Custom Message */}
+                                            <div className="space-y-3">
+                                                <Label className="text-sm font-medium">{isRomanian ? 'Mesaj personalizat (opțional)' : 'Custom message (optional)'}</Label>
+                                                <div className="flex gap-3">
+                                                    <Input 
+                                                        value={liveMessage}
+                                                        onChange={(e) => setLiveMessage(e.target.value)}
+                                                        className="input-modern flex-1"
+                                                        placeholder={isRomanian ? 'Ex: Extragere specială în 10 minute!' : 'Ex: Special draw in 10 minutes!'}
+                                                    />
+                                                    <Button onClick={updateLiveMessage} variant="outline" className="btn-outline">
+                                                        {isRomanian ? 'Salvează' : 'Save'}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                            
+                                            {/* TikTok Link */}
+                                            <div className="p-4 bg-black/30 rounded-xl">
+                                                <p className="text-sm text-muted-foreground mb-2">{isRomanian ? 'Link TikTok:' : 'TikTok Link:'}</p>
+                                                <a 
+                                                    href="https://www.tiktok.com/@x67digital.com" 
+                                                    target="_blank" 
+                                                    rel="noopener noreferrer"
+                                                    className="text-primary hover:underline font-mono"
+                                                >
+                                                    @x67digital.com
+                                                </a>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
+                                    
+                                    {/* Viva Webhook Info */}
+                                    <Card className="glass border-white/10">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-3">
+                                                <DollarSign className="w-6 h-6 text-green-400" />
+                                                {isRomanian ? 'Webhook Viva Payments' : 'Viva Payments Webhook'}
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-4">
+                                            <p className="text-sm text-muted-foreground">
+                                                {isRomanian 
+                                                    ? 'Configurează acest URL în panoul Viva Payments pentru a primi confirmări automate de plată:'
+                                                    : 'Configure this URL in Viva Payments panel to receive automatic payment confirmations:'}
+                                            </p>
+                                            <div className="p-4 bg-black/50 rounded-xl font-mono text-sm break-all">
+                                                <span className="text-green-400">{BACKEND_URL}/api/webhooks/viva</span>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground">
+                                                {isRomanian 
+                                                    ? '⚠️ Biletele se generează DOAR după confirmarea webhook-ului de la Viva'
+                                                    : '⚠️ Tickets are generated ONLY after Viva webhook confirmation'}
+                                            </p>
+                                        </CardContent>
+                                    </Card>
                                 </div>
                             </TabsContent>
                         </Tabs>

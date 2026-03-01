@@ -20,6 +20,8 @@ import TermsPage from "./pages/TermsPage";
 import AdminPage from "./pages/AdminPage";
 import ReferralPage from "./pages/ReferralPage";
 import CartPage from "./pages/CartPage";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage";
+import PaymentFailedPage from "./pages/PaymentFailedPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
@@ -68,6 +70,8 @@ const AppRouter = () => {
             <Route path="/search" element={<SearchTicketsPage />} />
             <Route path="/faq" element={<FAQPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/payment/success" element={<PaymentSuccessPage />} />
+            <Route path="/payment/failed" element={<PaymentFailedPage />} />
 
             {/* Protected Routes */}
             <Route
