@@ -61,7 +61,7 @@ const translations = {
 
         // Competitions
         all_competitions: "Toate Competițiile",
-        all_competitions_subtitle: "Răsfoiește toate competițiile disponibile și participă pentru șansa de a câștiga",
+        all_competitions_subtitle: "Răsfoiește toate competițiile disponibile și rezervă-ți locul",
         filter_status: "Status",
         filter_all_status: "Toate",
         filter_active: "Active",
@@ -208,7 +208,7 @@ const translations = {
         faq_3_a: "Pentru competițiile Câștig Instant, când toate biletele sunt vândute, sistemul nostru selectează automat și aleatoriu un număr de bilet câștigător. Pentru tragerile clasice, câștigătorii sunt selectați folosind un generator certificat de numere aleatorii când adminul încheie competiția.",
         faq_4_q: "Cum adaug fonduri în portofel?",
         faq_4_a: "Mergi la Panou > secțiunea Portofel și apasă 'Adaugă Fonduri'. Vei fi redirecționat către furnizorul nostru securizat de plăți (Viva Payments) unde poți plăti cu cardul de credit/debit. Fondurile sunt de obicei creditate instant.",
-        faq_5_q: "Cum aflu dacă am câștigat?",
+        faq_5_q: "Cum aflu dacă am primit premiul?",
         faq_5_a: "Câștigătorii sunt afișați pe pagina noastră de Câștigători imediat după extragere. Poți verifica și biletele cumpărate în Panou și să le compari cu numărul biletului câștigător afișat pe fiecare competiție încheiată.",
         faq_6_q: "Cum îmi revendic premiul?",
         faq_6_a: "Odată ce câștigi, te vom contacta prin adresa de email înregistrată în 24-48 de ore cu instrucțiuni despre cum să îți revendici premiul. Te rugăm să te asiguri că adresa ta de email este corectă și verifică folderul spam.",
@@ -286,7 +286,7 @@ const translations = {
 
         // Login
         welcome_login: "Bine ai venit",
-        login_subtitle: "Conectează-te pentru a participa la competiții și a câștiga premii uimitoare",
+        login_subtitle: "Conectează-te pentru a participa la competiții și a primi premii uimitoare",
         tab_signin: "Conectare",
         tab_signup: "Înregistrare",
         email: "Email",
