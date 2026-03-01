@@ -135,6 +135,15 @@ const LoginPage = () => {
                                                 data-testid="login-password-input"
                                             />
                                         </div>
+                                        <div className="text-right">
+                                            <Link 
+                                                to="/forgot-password" 
+                                                className="text-xs text-primary hover:underline"
+                                                data-testid="forgot-password-link"
+                                            >
+                                                {t('forgot_password') || 'Ai uitat parola?'}
+                                            </Link>
+                                        </div>
                                     </div>
                                     <Button
                                         type="submit"

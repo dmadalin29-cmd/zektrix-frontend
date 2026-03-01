@@ -18,7 +18,7 @@ import axios from 'axios';
 import { 
     Shield, LayoutDashboard, Trophy, Users, Ticket, Plus, Edit, Trash2, 
     Loader2, ArrowLeft, Zap, Clock, Search, DollarSign, Award, CheckCircle,
-    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff, Sparkles, Wand2, MessageCircle
+    XCircle, User, RefreshCw, BarChart3, Settings, Radio, Wifi, WifiOff, Sparkles, Wand2, MessageCircle, Mail
 } from 'lucide-react';
 
 // TikTok Icon
@@ -68,7 +68,15 @@ const AdminPage = () => {
         competition_type: 'instant_win', image_url: '', prize_description: '',
         qual_question: '', qual_option1: '', qual_option2: '', qual_option3: '', qual_correct: '0'
     });
-    const [userForm, setUserForm] = useState({ balance_change: '', new_password: '', role: '' });
+    const [userForm, setUserForm] = useState({ 
+        first_name: '', 
+        last_name: '', 
+        email: '', 
+        phone: '', 
+        balance: '', 
+        new_password: '', 
+        role: '' 
+    });
     const [winnerForm, setWinnerForm] = useState({ competition_id: '', user_id: '', ticket_number: '', prize_description: '' });
 
     // Filters
@@ -331,20 +339,26 @@ const AdminPage = () => {
         e.preventDefault();
         try {
             const data = {};
-            if (userForm.balance_change) data.balance_change = parseFloat(userForm.balance_change);
+            if (userForm.first_name !== editingUser?.first_name) data.first_name = userForm.first_name;
+            if (userForm.last_name !== editingUser?.last_name) data.last_name = userForm.last_name;
+            if (userForm.email !== editingUser?.email) data.email = userForm.email;
+            if (userForm.phone !== editingUser?.phone) data.phone = userForm.phone;
+            if (userForm.balance && parseFloat(userForm.balance) !== editingUser?.balance) {
+                data.balance = parseFloat(userForm.balance);
+            }
             if (userForm.new_password) data.new_password = userForm.new_password;
-            if (userForm.role) data.role = userForm.role;
+            if (userForm.role && userForm.role !== editingUser?.role) data.role = userForm.role;
             
             await axios.put(`${API}/admin/users/${editingUser.user_id}`, data, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            toast.success('User updated');
+            toast.success(isRomanian ? 'Utilizator actualizat!' : 'User updated');
             setShowUserModal(false);
             setEditingUser(null);
-            setUserForm({ balance_change: '', new_password: '', role: '' });
+            setUserForm({ first_name: '', last_name: '', email: '', phone: '', balance: '', new_password: '', role: '' });
             fetchAll();
         } catch (error) {
-            toast.error(getErrorMessage(error, 'Update failed'));
+            toast.error(getErrorMessage(error, isRomanian ? 'Actualizare eșuată' : 'Update failed'));
         }
     };
 
@@ -389,9 +403,48 @@ const AdminPage = () => {
         setShowCompModal(true);
     };
 
+    const handleBlockUser = async (u) => {
+        const action = u.is_blocked ? 'debloca' : 'bloca';
+        if (!confirm(`Ești sigur că vrei să ${action} utilizatorul ${u.username}?`)) return;
+        
+        try {
+            await axios.put(`${API}/admin/users/${u.user_id}`, {
+                is_blocked: !u.is_blocked
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success(u.is_blocked ? 'Utilizator deblocat!' : 'Utilizator blocat!');
+            fetchAll();
+        } catch (error) {
+            toast.error(getErrorMessage(error, 'Operațiunea a eșuat'));
+        }
+    };
+
+    const handleDeleteUser = async (u) => {
+        if (!confirm(`⚠️ ATENȚIE: Ești sigur că vrei să ștergi permanent utilizatorul ${u.username}? Această acțiune NU poate fi anulată!`)) return;
+        
+        try {
+            await axios.delete(`${API}/admin/users/${u.user_id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            toast.success('Utilizator șters cu succes!');
+            fetchAll();
+        } catch (error) {
+            toast.error(getErrorMessage(error, 'Ștergerea a eșuat'));
+        }
+    };
+
     const openEditUser = (u) => {
         setEditingUser(u);
-        setUserForm({ balance_change: '', new_password: '', role: u.role });
+        setUserForm({ 
+            first_name: u.first_name || '', 
+            last_name: u.last_name || '', 
+            email: u.email || '', 
+            phone: u.phone || '', 
+            balance: (u.balance || 0).toString(), 
+            new_password: '', 
+            role: u.role || 'user'
+        });
         setShowUserModal(true);
     };
 
@@ -601,25 +654,33 @@ const AdminPage = () => {
 
                             {/* Users Tab */}
                             <TabsContent value="users">
-                                <h2 className="text-2xl font-bold mb-6">Manage Users</h2>
+                                <h2 className="text-2xl font-bold mb-6">{isRomanian ? 'Gestionare Utilizatori' : 'Manage Users'}</h2>
                                 <Card className="glass border-white/10">
                                     <CardContent className="p-0">
                                         <div className="overflow-x-auto">
                                             <table className="w-full table-modern">
                                                 <thead>
                                                     <tr className="border-b border-white/10">
-                                                        <th>User</th>
+                                                        <th>{isRomanian ? 'Utilizator' : 'User'}</th>
                                                         <th>Email</th>
-                                                        <th>Balance</th>
-                                                        <th>Role</th>
-                                                        <th>Actions</th>
+                                                        <th>{isRomanian ? 'Telefon' : 'Phone'}</th>
+                                                        <th>{isRomanian ? 'Sold' : 'Balance'}</th>
+                                                        <th>{isRomanian ? 'Rol' : 'Role'}</th>
+                                                        <th>Status</th>
+                                                        <th>{isRomanian ? 'Acțiuni' : 'Actions'}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {users.map((u) => (
-                                                        <tr key={u.user_id} data-testid={`admin-user-${u.user_id}`}>
-                                                            <td className="font-medium">{u.username}</td>
-                                                            <td className="text-muted-foreground">{u.email}</td>
+                                                        <tr key={u.user_id} data-testid={`admin-user-${u.user_id}`} className={u.is_blocked ? 'opacity-50' : ''}>
+                                                            <td>
+                                                                <div>
+                                                                    <p className="font-medium">{u.first_name || ''} {u.last_name || ''}</p>
+                                                                    <p className="text-xs text-muted-foreground">@{u.username}</p>
+                                                                </div>
+                                                            </td>
+                                                            <td className="text-muted-foreground text-sm">{u.email}</td>
+                                                            <td className="text-muted-foreground text-sm">{u.phone || '-'}</td>
                                                             <td className="text-secondary font-bold">RON {(u.balance || 0).toFixed(2)}</td>
                                                             <td>
                                                                 <Badge className={u.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted'}>
@@ -627,9 +688,44 @@ const AdminPage = () => {
                                                                 </Badge>
                                                             </td>
                                                             <td>
-                                                                <Button variant="outline" size="sm" onClick={() => openEditUser(u)} data-testid={`edit-user-${u.user_id}`}>
-                                                                    <Edit className="w-4 h-4" />
-                                                                </Button>
+                                                                {u.is_blocked ? (
+                                                                    <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
+                                                                        <XCircle className="w-3 h-3 mr-1" /> Blocat
+                                                                    </Badge>
+                                                                ) : (
+                                                                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                                                                        <CheckCircle className="w-3 h-3 mr-1" /> Activ
+                                                                    </Badge>
+                                                                )}
+                                                            </td>
+                                                            <td>
+                                                                <div className="flex gap-2">
+                                                                    <Button variant="outline" size="sm" onClick={() => openEditUser(u)} data-testid={`edit-user-${u.user_id}`}>
+                                                                        <Edit className="w-4 h-4" />
+                                                                    </Button>
+                                                                    {u.role !== 'admin' && (
+                                                                        <>
+                                                                            <Button 
+                                                                                variant="outline" 
+                                                                                size="sm" 
+                                                                                onClick={() => handleBlockUser(u)}
+                                                                                className={u.is_blocked ? 'border-green-500/30 text-green-400' : 'border-yellow-500/30 text-yellow-400'}
+                                                                                data-testid={`block-user-${u.user_id}`}
+                                                                            >
+                                                                                {u.is_blocked ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                                                                            </Button>
+                                                                            <Button 
+                                                                                variant="outline" 
+                                                                                size="sm" 
+                                                                                onClick={() => handleDeleteUser(u)}
+                                                                                className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                                                                                data-testid={`delete-user-${u.user_id}`}
+                                                                            >
+                                                                                <Trash2 className="w-4 h-4" />
+                                                                            </Button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -872,6 +968,86 @@ const AdminPage = () => {
                                             </p>
                                         </CardContent>
                                     </Card>
+                                    
+                                    {/* Email Bot Section */}
+                                    <Card className="glass border-white/10">
+                                        <CardHeader>
+                                            <CardTitle className="flex items-center gap-3">
+                                                <Mail className="w-6 h-6 text-violet-400" />
+                                                {isRomanian ? 'Bot Email Notificări' : 'Email Notification Bot'}
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent className="space-y-6">
+                                            <p className="text-sm text-muted-foreground">
+                                                {isRomanian 
+                                                    ? 'Trimite emailuri automate către toți utilizatorii înregistrați.'
+                                                    : 'Send automated emails to all registered users.'}
+                                            </p>
+                                            
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                {/* Daily Digest */}
+                                                <div className="p-4 bg-violet-500/10 border border-violet-500/30 rounded-xl">
+                                                    <h4 className="font-semibold text-violet-400 mb-2">📬 Digest Zilnic</h4>
+                                                    <p className="text-xs text-muted-foreground mb-4">
+                                                        {isRomanian 
+                                                            ? 'Trimite un email cu competițiile noi și cele care se termină curând.'
+                                                            : 'Send email with new competitions and ending soon.'}
+                                                    </p>
+                                                    <Button 
+                                                        onClick={async () => {
+                                                            try {
+                                                                const res = await axios.post(`${API}/admin/send-daily-digest`, {}, {
+                                                                    headers: { Authorization: `Bearer ${token}` }
+                                                                });
+                                                                toast.success(res.data.message);
+                                                            } catch (error) {
+                                                                toast.error(getErrorMessage(error, 'Eroare la trimitere'));
+                                                            }
+                                                        }}
+                                                        className="w-full bg-violet-600 hover:bg-violet-700"
+                                                        data-testid="send-daily-digest-btn"
+                                                    >
+                                                        {isRomanian ? 'Trimite Digest' : 'Send Digest'}
+                                                    </Button>
+                                                </div>
+                                                
+                                                {/* 75% Notification */}
+                                                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl">
+                                                    <h4 className="font-semibold text-orange-400 mb-2">⚡ Notificare 75%+</h4>
+                                                    <p className="text-xs text-muted-foreground mb-4">
+                                                        {isRomanian 
+                                                            ? 'Trimite notificare când o competiție depășește 75% vândut.'
+                                                            : 'Notify when competition exceeds 75% sold.'}
+                                                    </p>
+                                                    <Select onValueChange={async (compId) => {
+                                                        if (!compId) return;
+                                                        try {
+                                                            const res = await axios.post(`${API}/admin/notify-75-percent/${compId}`, {}, {
+                                                                headers: { Authorization: `Bearer ${token}` }
+                                                            });
+                                                            toast.success(res.data.message);
+                                                        } catch (error) {
+                                                            toast.error(getErrorMessage(error, 'Eroare la trimitere'));
+                                                        }
+                                                    }}>
+                                                        <SelectTrigger className="bg-muted border-white/10">
+                                                            <SelectValue placeholder={isRomanian ? 'Alege competiția' : 'Select competition'} />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {competitions.filter(c => c.status === 'active').map((c) => {
+                                                                const percent = Math.round((c.sold_tickets / c.max_tickets) * 100);
+                                                                return (
+                                                                    <SelectItem key={c.competition_id} value={c.competition_id}>
+                                                                        {c.title} ({percent}%)
+                                                                    </SelectItem>
+                                                                );
+                                                            })}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                            </div>
+                                        </CardContent>
+                                    </Card>
                                 </div>
                             </TabsContent>
 
@@ -1075,22 +1251,81 @@ const AdminPage = () => {
 
             {/* User Modal */}
             <Dialog open={showUserModal} onOpenChange={setShowUserModal}>
-                <DialogContent className="sm:max-w-md glass border-white/10">
+                <DialogContent className="sm:max-w-lg glass border-white/10">
                     <DialogHeader>
-                        <DialogTitle>Edit User: {editingUser?.username}</DialogTitle>
+                        <DialogTitle>{isRomanian ? 'Editează Utilizator' : 'Edit User'}: {editingUser?.username}</DialogTitle>
+                        <DialogDescription>{editingUser?.email}</DialogDescription>
                     </DialogHeader>
                     <form onSubmit={handleUserSubmit} className="space-y-4">
-                        <div>
-                            <Label>Balance Adjustment (RON )</Label>
-                            <Input type="number" step="0.01" value={userForm.balance_change} onChange={(e) => setUserForm(prev => ({ ...prev, balance_change: e.target.value }))} className="input-modern" placeholder="+10 or -5" data-testid="user-balance-input" />
-                            <p className="text-xs text-muted-foreground mt-1">Current: RON {(editingUser?.balance || 0).toFixed(2)}</p>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <Label>{isRomanian ? 'Prenume' : 'First Name'}</Label>
+                                <Input 
+                                    value={userForm.first_name} 
+                                    onChange={(e) => setUserForm(prev => ({ ...prev, first_name: e.target.value }))} 
+                                    className="input-modern" 
+                                    placeholder="Ion"
+                                    data-testid="user-firstname-input" 
+                                />
+                            </div>
+                            <div>
+                                <Label>{isRomanian ? 'Nume' : 'Last Name'}</Label>
+                                <Input 
+                                    value={userForm.last_name} 
+                                    onChange={(e) => setUserForm(prev => ({ ...prev, last_name: e.target.value }))} 
+                                    className="input-modern" 
+                                    placeholder="Popescu"
+                                    data-testid="user-lastname-input" 
+                                />
+                            </div>
                         </div>
                         <div>
-                            <Label>New Password (leave empty to keep current)</Label>
-                            <Input type="password" value={userForm.new_password} onChange={(e) => setUserForm(prev => ({ ...prev, new_password: e.target.value }))} className="input-modern" data-testid="user-password-input" />
+                            <Label>Email</Label>
+                            <Input 
+                                type="email"
+                                value={userForm.email} 
+                                onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))} 
+                                className="input-modern" 
+                                data-testid="user-email-input" 
+                            />
                         </div>
                         <div>
-                            <Label>Role</Label>
+                            <Label>{isRomanian ? 'Telefon' : 'Phone'}</Label>
+                            <Input 
+                                value={userForm.phone} 
+                                onChange={(e) => setUserForm(prev => ({ ...prev, phone: e.target.value }))} 
+                                className="input-modern" 
+                                placeholder="+40 7XX XXX XXX"
+                                data-testid="user-phone-input" 
+                            />
+                        </div>
+                        <div>
+                            <Label>{isRomanian ? 'Sold (RON)' : 'Balance (RON)'}</Label>
+                            <Input 
+                                type="number" 
+                                step="0.01" 
+                                value={userForm.balance} 
+                                onChange={(e) => setUserForm(prev => ({ ...prev, balance: e.target.value }))} 
+                                className="input-modern" 
+                                data-testid="user-balance-input" 
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                                {isRomanian ? 'Sold curent' : 'Current'}: RON {(editingUser?.balance || 0).toFixed(2)}
+                            </p>
+                        </div>
+                        <div>
+                            <Label>{isRomanian ? 'Parolă Nouă (lasă gol pentru a păstra)' : 'New Password (leave empty to keep)'}</Label>
+                            <Input 
+                                type="password" 
+                                value={userForm.new_password} 
+                                onChange={(e) => setUserForm(prev => ({ ...prev, new_password: e.target.value }))} 
+                                className="input-modern" 
+                                placeholder="••••••••"
+                                data-testid="user-password-input" 
+                            />
+                        </div>
+                        <div>
+                            <Label>{isRomanian ? 'Rol' : 'Role'}</Label>
                             <Select value={userForm.role} onValueChange={(v) => setUserForm(prev => ({ ...prev, role: v }))}>
                                 <SelectTrigger className="bg-muted border-white/10" data-testid="user-role-select">
                                     <SelectValue />
@@ -1102,8 +1337,12 @@ const AdminPage = () => {
                             </Select>
                         </div>
                         <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setShowUserModal(false)}>Cancel</Button>
-                            <Button type="submit" className="btn-primary" data-testid="user-submit-btn">Update User</Button>
+                            <Button type="button" variant="outline" onClick={() => setShowUserModal(false)}>
+                                {isRomanian ? 'Anulează' : 'Cancel'}
+                            </Button>
+                            <Button type="submit" className="btn-primary" data-testid="user-submit-btn">
+                                {isRomanian ? 'Actualizează' : 'Update User'}
+                            </Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>

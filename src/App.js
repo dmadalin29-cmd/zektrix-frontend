@@ -25,6 +25,8 @@ const CartPage = lazy(() => import("./pages/CartPage"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
 const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
 const LuckyWheelPage = lazy(() => import("./pages/LuckyWheelPage"));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
 
 // Global Components
 import InstallPrompt from "./components/InstallPrompt";
@@ -79,6 +81,8 @@ const AppRouter = () => {
                 {/* Public Routes */}
                 <Route path="/" element={<HomePage />} />
                 <Route path="/login" element={<LoginPage />} />
+                <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                <Route path="/reset-password" element={<ResetPasswordPage />} />
                 <Route path="/auth/callback" element={<AuthCallback />} />
                 <Route path="/competitions" element={<CompetitionsPage />} />
                 <Route path="/competitions/:id" element={<CompetitionDetailPage />} />

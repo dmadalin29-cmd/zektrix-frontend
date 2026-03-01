@@ -348,6 +348,45 @@ code, .font-mono {
     transform: translateY(-2px);
 }
 
+/* MODERN BUTTON VARIATIONS */
+.btn-modern {
+    @apply font-semibold rounded-xl px-6 py-3 transition-all duration-300;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: #fff;
+}
+
+.btn-modern:hover {
+    background: rgba(139, 92, 246, 0.25);
+    border-color: #8b5cf6;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(139, 92, 246, 0.3);
+}
+
+.btn-modern-sm {
+    @apply font-medium rounded-lg px-4 py-2 text-sm transition-all duration-300;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: #fff;
+}
+
+.btn-modern-sm:hover {
+    background: rgba(139, 92, 246, 0.2);
+    border-color: #8b5cf6;
+}
+
+.btn-glow {
+    @apply font-bold rounded-xl px-6 py-3 transition-all duration-300;
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+}
+
 /* INPUT STYLES */
 .input-modern {
     @apply rounded-2xl px-5 py-4 text-white placeholder:text-white/40 transition-all duration-300;
