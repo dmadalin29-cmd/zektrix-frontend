@@ -186,49 +186,87 @@ const Navbar = () => {
                     {/* Mobile Menu */}
                     <Sheet>
                         <SheetTrigger asChild className="md:hidden">
-                            <Button variant="ghost" size="icon" data-testid="mobile-menu-btn">
-                                <Menu className="h-5 w-5" />
+                            <Button variant="ghost" size="icon" className="relative" data-testid="mobile-menu-btn">
+                                <Menu className="h-6 w-6" />
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="w-[300px] bg-background border-white/10">
-                            <div className="flex flex-col gap-6 mt-8">
+                        <SheetContent side="right" className="w-full sm:w-[350px] p-0 border-l border-primary/20 bg-gradient-to-b from-background via-background to-primary/5">
+                            {/* Header */}
+                            <div className="p-6 border-b border-white/10">
+                                <div className="text-2xl font-black tracking-tighter">
+                                    <span className="gradient-text">ZEKTRIX</span>
+                                    <span className="text-white">.UK</span>
+                                </div>
+                            </div>
+                            
+                            {/* Navigation Links */}
+                            <div className="p-6 space-y-2">
                                 {navLinks.map((link) => (
                                     <Link
                                         key={link.href}
                                         to={link.href}
-                                        className={`text-lg font-medium transition-colors ${
-                                            isActive(link.href) ? 'text-primary' : 'text-muted-foreground hover:text-white'
+                                        className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${
+                                            isActive(link.href) 
+                                                ? 'bg-gradient-to-r from-primary/20 to-secondary/10 text-white border border-primary/30' 
+                                                : 'text-white/70 hover:bg-white/5 hover:text-white'
                                         }`}
                                     >
-                                        {link.label}
+                                        <span className="text-lg font-semibold">{link.label}</span>
+                                        {isActive(link.href) && <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />}
                                     </Link>
                                 ))}
-                                <Link to="/cart" className="text-lg font-medium text-muted-foreground hover:text-white flex items-center gap-2">
+                                
+                                {/* TikTok Link */}
+                                <a
+                                    href="https://www.tiktok.com/@x67.uk"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300"
+                                >
+                                    <TikTokIcon className="w-5 h-5" />
+                                    <span className="text-lg font-semibold">@x67.uk</span>
+                                    <span className="ml-auto px-2 py-1 text-xs bg-secondary/20 text-secondary rounded-full">TikTok</span>
+                                </a>
+                                
+                                {/* Cart */}
+                                <Link to="/cart" className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300">
                                     <ShoppingCart className="w-5 h-5" />
-                                    {t('nav_cart') || 'Coș'}
-                                    {totalItems > 0 && <span className="text-secondary">({totalItems})</span>}
+                                    <span className="text-lg font-semibold">{t('nav_cart') || 'Coș'}</span>
+                                    {totalItems > 0 && (
+                                        <span className="ml-auto px-3 py-1 text-sm font-bold bg-gradient-to-r from-primary to-secondary rounded-full text-white">
+                                            {totalItems}
+                                        </span>
+                                    )}
                                 </Link>
-                                {isAuthenticated && (
-                                    <>
-                                        <hr className="border-white/10" />
-                                        <Link to="/dashboard" className="text-lg font-medium text-muted-foreground hover:text-white">
-                                            {t('nav_dashboard')}
+                            </div>
+                            
+                            {/* User Section */}
+                            {isAuthenticated && (
+                                <div className="p-6 border-t border-white/10">
+                                    <p className="text-xs text-white/40 uppercase tracking-wider mb-4">Contul meu</p>
+                                    <Link to="/dashboard" className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300">
+                                        <LayoutDashboard className="w-5 h-5" />
+                                        <span className="text-lg font-semibold">{t('nav_dashboard')}</span>
+                                    </Link>
+                                    {isAdmin && (
+                                        <Link to="/admin" className="flex items-center gap-4 p-4 rounded-2xl text-primary hover:bg-primary/10 transition-all duration-300">
+                                            <Shield className="w-5 h-5" />
+                                            <span className="text-lg font-semibold">{t('nav_admin')}</span>
+                                            <span className="ml-auto px-2 py-1 text-xs bg-primary/20 text-primary rounded-full">Admin</span>
                                         </Link>
-                                        {isAdmin && (
-                                            <Link to="/admin" className="text-lg font-medium text-primary">
-                                                {t('nav_admin')}
-                                            </Link>
-                                        )}
-                                    </>
-                                )}
-                                <hr className="border-white/10" />
+                                    )}
+                                </div>
+                            )}
+                            
+                            {/* Footer */}
+                            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10 bg-background/80 backdrop-blur-xl">
                                 <Button
                                     variant="outline"
                                     onClick={toggleLanguage}
-                                    className="w-full justify-start"
+                                    className="w-full h-14 justify-center gap-3 rounded-2xl border-white/20 hover:bg-white/5 text-base font-semibold"
                                 >
-                                    <Globe className="w-4 h-4 mr-2" />
-                                    {language === 'ro' ? 'Switch to English' : 'Schimbă în Română'}
+                                    <Globe className="w-5 h-5" />
+                                    {language === 'ro' ? '🇬🇧 English' : '🇷🇴 Română'}
                                 </Button>
                             </div>
                         </SheetContent>

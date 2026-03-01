@@ -594,71 +594,88 @@ const AdminPage = () => {
 
             {/* Competition Modal */}
             <Dialog open={showCompModal} onOpenChange={setShowCompModal}>
-                <DialogContent className="sm:max-w-lg glass border-white/10">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto glass border-white/10">
                     <DialogHeader>
-                        <DialogTitle>{editingComp ? 'Edit Competition' : 'Add Competition'}</DialogTitle>
+                        <DialogTitle className="text-xl font-bold">{editingComp ? 'Editează Competiția' : 'Creează Competiție Nouă'}</DialogTitle>
                     </DialogHeader>
-                    <form onSubmit={handleCompSubmit} className="space-y-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="col-span-2">
-                                <Label>Title</Label>
-                                <Input value={compForm.title} onChange={(e) => setCompForm(prev => ({ ...prev, title: e.target.value }))} className="input-modern" required data-testid="comp-title-input" />
-                            </div>
-                            <div className="col-span-2">
-                                <Label>Description</Label>
-                                <Textarea value={compForm.description} onChange={(e) => setCompForm(prev => ({ ...prev, description: e.target.value }))} className="input-modern" required data-testid="comp-desc-input" />
+                    <form onSubmit={handleCompSubmit} className="space-y-6 py-4">
+                        {/* Basic Info */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-primary uppercase tracking-wider">Informații de Bază</h3>
+                            <div>
+                                <Label className="text-sm font-medium mb-2 block">Titlu Competiție *</Label>
+                                <Input value={compForm.title} onChange={(e) => setCompForm(prev => ({ ...prev, title: e.target.value }))} className="input-modern" required data-testid="comp-title-input" placeholder="Ex: iPhone 15 Pro Max" />
                             </div>
                             <div>
-                                <Label>Ticket Price (RON )</Label>
-                                <Input type="number" step="0.01" value={compForm.ticket_price} onChange={(e) => setCompForm(prev => ({ ...prev, ticket_price: e.target.value }))} className="input-modern" required data-testid="comp-price-input" />
+                                <Label className="text-sm font-medium mb-2 block">Descriere *</Label>
+                                <Textarea value={compForm.description} onChange={(e) => setCompForm(prev => ({ ...prev, description: e.target.value }))} className="input-modern min-h-[100px]" required data-testid="comp-desc-input" placeholder="Descriere detaliată a competiției..." />
                             </div>
+                        </div>
+
+                        {/* Pricing & Tickets */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-secondary uppercase tracking-wider">Prețuri & Locuri</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label className="text-sm font-medium mb-2 block">Preț per Loc (RON) *</Label>
+                                    <Input type="number" step="0.01" value={compForm.ticket_price} onChange={(e) => setCompForm(prev => ({ ...prev, ticket_price: e.target.value }))} className="input-modern" required data-testid="comp-price-input" placeholder="5.00" />
+                                </div>
+                                <div>
+                                    <Label className="text-sm font-medium mb-2 block">Nr. Total Locuri *</Label>
+                                    <Input type="number" value={compForm.max_tickets} onChange={(e) => setCompForm(prev => ({ ...prev, max_tickets: e.target.value }))} className="input-modern" required data-testid="comp-max-input" placeholder="100" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Type & Image */}
+                        <div className="space-y-4">
+                            <h3 className="text-sm font-semibold text-accent uppercase tracking-wider">Tip & Imagine</h3>
                             <div>
-                                <Label>Max Tickets</Label>
-                                <Input type="number" value={compForm.max_tickets} onChange={(e) => setCompForm(prev => ({ ...prev, max_tickets: e.target.value }))} className="input-modern" required data-testid="comp-max-input" />
-                            </div>
-                            <div className="col-span-2">
-                                <Label>Type</Label>
+                                <Label className="text-sm font-medium mb-2 block">Tip Competiție</Label>
                                 <Select value={compForm.competition_type} onValueChange={(v) => setCompForm(prev => ({ ...prev, competition_type: v }))}>
-                                    <SelectTrigger className="bg-muted border-white/10" data-testid="comp-type-select">
+                                    <SelectTrigger className="bg-muted border-white/10 h-12" data-testid="comp-type-select">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="instant_win">Instant Win (auto draw at 100%)</SelectItem>
-                                        <SelectItem value="classic">Classic (manual draw)</SelectItem>
+                                        <SelectItem value="instant_win">🎯 Instant - Extragere automată la 100%</SelectItem>
+                                        <SelectItem value="classic">🎲 Clasic - Extragere manuală</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
-                            <div className="col-span-2">
-                                <Label>Image URL</Label>
-                                <Input value={compForm.image_url} onChange={(e) => setCompForm(prev => ({ ...prev, image_url: e.target.value }))} className="input-modern" placeholder="https://..." data-testid="comp-image-input" />
+                            <div>
+                                <Label className="text-sm font-medium mb-2 block">URL Imagine</Label>
+                                <Input value={compForm.image_url} onChange={(e) => setCompForm(prev => ({ ...prev, image_url: e.target.value }))} className="input-modern" placeholder="https://imagine-produs.jpg" data-testid="comp-image-input" />
                             </div>
-                            <div className="col-span-2">
-                                <Label>Prize Description</Label>
-                                <Input value={compForm.prize_description} onChange={(e) => setCompForm(prev => ({ ...prev, prize_description: e.target.value }))} className="input-modern" data-testid="comp-prize-input" />
+                            <div>
+                                <Label className="text-sm font-medium mb-2 block">Descriere Premiu</Label>
+                                <Input value={compForm.prize_description} onChange={(e) => setCompForm(prev => ({ ...prev, prize_description: e.target.value }))} className="input-modern" data-testid="comp-prize-input" placeholder="iPhone 15 Pro Max 256GB" />
                             </div>
-                            
-                            {/* Qualification Question Section */}
-                            <div className="col-span-2 border-t border-white/10 pt-4 mt-2">
-                                <p className="text-sm font-medium mb-3 text-accent">Întrebare de Calificare (opțional - se generează automat dacă e gol)</p>
-                            </div>
-                            <div className="col-span-2">
-                                <Label>Întrebare</Label>
+                        </div>
+                        
+                        {/* Qualification Question */}
+                        <div className="space-y-4 border-t border-white/10 pt-6">
+                            <h3 className="text-sm font-semibold text-yellow-400 uppercase tracking-wider">Întrebare de Calificare (opțional)</h3>
+                            <p className="text-xs text-muted-foreground">Lasă gol pentru generare automată</p>
+                            <div>
+                                <Label className="text-sm font-medium mb-2 block">Întrebare</Label>
                                 <Input value={compForm.qual_question} onChange={(e) => setCompForm(prev => ({ ...prev, qual_question: e.target.value }))} className="input-modern" placeholder="Ex: Care este capitala României?" data-testid="comp-qual-question" />
                             </div>
-                            <div>
-                                <Label>Opțiune 1</Label>
-                                <Input value={compForm.qual_option1} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option1: e.target.value }))} className="input-modern" placeholder="Răspuns 1" data-testid="comp-qual-opt1" />
+                            <div className="grid grid-cols-3 gap-3">
+                                <div>
+                                    <Label className="text-xs mb-1 block">Opțiune 1</Label>
+                                    <Input value={compForm.qual_option1} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option1: e.target.value }))} className="input-modern text-sm" placeholder="Răspuns 1" data-testid="comp-qual-opt1" />
+                                </div>
+                                <div>
+                                    <Label className="text-xs mb-1 block">Opțiune 2</Label>
+                                    <Input value={compForm.qual_option2} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option2: e.target.value }))} className="input-modern text-sm" placeholder="Răspuns 2" data-testid="comp-qual-opt2" />
+                                </div>
+                                <div>
+                                    <Label className="text-xs mb-1 block">Opțiune 3</Label>
+                                    <Input value={compForm.qual_option3} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option3: e.target.value }))} className="input-modern text-sm" placeholder="Răspuns 3" data-testid="comp-qual-opt3" />
+                                </div>
                             </div>
-                            <div>
-                                <Label>Opțiune 2</Label>
-                                <Input value={compForm.qual_option2} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option2: e.target.value }))} className="input-modern" placeholder="Răspuns 2" data-testid="comp-qual-opt2" />
-                            </div>
-                            <div>
-                                <Label>Opțiune 3</Label>
-                                <Input value={compForm.qual_option3} onChange={(e) => setCompForm(prev => ({ ...prev, qual_option3: e.target.value }))} className="input-modern" placeholder="Răspuns 3" data-testid="comp-qual-opt3" />
-                            </div>
-                            <div>
-                                <Label>Răspuns Corect</Label>
+                            <div className="w-48">
+                                <Label className="text-xs mb-1 block">Răspuns Corect</Label>
                                 <Select value={compForm.qual_correct} onValueChange={(v) => setCompForm(prev => ({ ...prev, qual_correct: v }))}>
                                     <SelectTrigger className="bg-muted border-white/10" data-testid="comp-qual-correct">
                                         <SelectValue />
@@ -671,9 +688,10 @@ const AdminPage = () => {
                                 </Select>
                             </div>
                         </div>
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setShowCompModal(false)}>Cancel</Button>
-                            <Button type="submit" className="btn-primary" data-testid="comp-submit-btn">{editingComp ? 'Update' : 'Create'}</Button>
+
+                        <DialogFooter className="pt-4 border-t border-white/10">
+                            <Button type="button" variant="outline" onClick={() => setShowCompModal(false)} className="mr-2">Anulează</Button>
+                            <Button type="submit" className="btn-primary" data-testid="comp-submit-btn">{editingComp ? 'Actualizează' : 'Creează Competiția'}</Button>
                         </DialogFooter>
                     </form>
                 </DialogContent>
