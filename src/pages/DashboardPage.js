@@ -65,7 +65,7 @@ const DashboardPage = () => {
     const handleDeposit = async () => {
         const amount = parseFloat(depositAmount);
         if (isNaN(amount) || amount < 1) {
-            toast.error('Minimum deposit is £1');
+            toast.error('Minimum deposit is RON 1');
             return;
         }
 
@@ -146,7 +146,7 @@ const DashboardPage = () => {
                                 <div>
                                     <p className="text-xs text-muted-foreground">{t('your_balance')}</p>
                                     <p className="text-2xl font-bold text-secondary" data-testid="wallet-balance">
-                                        £{(user?.balance || 0).toFixed(2)}
+                                        RON {(user?.balance || 0).toFixed(2)}
                                     </p>
                                 </div>
                                 <Button 
@@ -285,7 +285,7 @@ const DashboardPage = () => {
                                                         </div>
                                                     </div>
                                                     <span className={`font-bold ${txn.amount > 0 ? 'text-secondary' : 'text-primary'}`}>
-                                                        {txn.amount > 0 ? '+' : ''}£{Math.abs(txn.amount).toFixed(2)}
+                                                        {txn.amount > 0 ? '+' : ''}RON {Math.abs(txn.amount).toFixed(2)}
                                                     </span>
                                                 </div>
                                             ))}
@@ -352,7 +352,7 @@ const DashboardPage = () => {
                                         </div>
                                         <p className="text-sm text-muted-foreground mb-2">Available Balance</p>
                                         <p className="text-4xl font-bold text-secondary mb-6">
-                                            £{(user?.balance || 0).toFixed(2)}
+                                            RON {(user?.balance || 0).toFixed(2)}
                                         </p>
                                         <Button 
                                             className="btn-secondary w-full"
@@ -431,7 +431,7 @@ const DashboardPage = () => {
                                                             <td className={`text-right font-bold ${
                                                                 txn.amount > 0 ? 'text-secondary' : 'text-primary'
                                                             }`}>
-                                                                {txn.amount > 0 ? '+' : ''}£{Math.abs(txn.amount).toFixed(2)}
+                                                                {txn.amount > 0 ? '+' : ''}RON {Math.abs(txn.amount).toFixed(2)}
                                                             </td>
                                                         </tr>
                                                     ))}
@@ -463,7 +463,7 @@ const DashboardPage = () => {
                     </DialogHeader>
                     <div className="py-4 space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Amount (£)</Label>
+                            <Label htmlFor="amount">Amount (RON )</Label>
                             <div className="relative">
                                 <PoundSterling className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                 <Input
@@ -488,7 +488,7 @@ const DashboardPage = () => {
                                     onClick={() => setDepositAmount(amt.toString())}
                                     className="border-white/20"
                                 >
-                                    £{amt}
+                                    RON {amt}
                                 </Button>
                             ))}
                         </div>

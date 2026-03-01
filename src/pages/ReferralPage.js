@@ -72,8 +72,8 @@ const ReferralPage = () => {
 
     const shareOnTwitter = () => {
         const text = isRomanian 
-            ? `🎉 Înscrie-te la Zektrix UK și primești £5 bonus! Folosește codul meu: ${referralData?.referral_code}`
-            : `🎉 Join Zektrix UK and get £5 bonus! Use my code: ${referralData?.referral_code}`;
+            ? `🎉 Înscrie-te la Zektrix UK și primești RON 5 bonus! Folosește codul meu: ${referralData?.referral_code}`
+            : `🎉 Join Zektrix UK and get RON 5 bonus! Use my code: ${referralData?.referral_code}`;
         window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(referralData?.referral_link)}`, '_blank');
     };
 
@@ -83,8 +83,8 @@ const ReferralPage = () => {
 
     const shareOnWhatsApp = () => {
         const text = isRomanian 
-            ? `🎉 Înscrie-te la Zektrix UK și primești £5 bonus! ${referralData?.referral_link} - Codul meu: ${referralData?.referral_code}`
-            : `🎉 Join Zektrix UK and get £5 bonus! ${referralData?.referral_link} - My code: ${referralData?.referral_code}`;
+            ? `🎉 Înscrie-te la Zektrix UK și primești RON 5 bonus! ${referralData?.referral_link} - Codul meu: ${referralData?.referral_code}`
+            : `🎉 Join Zektrix UK and get RON 5 bonus! ${referralData?.referral_link} - My code: ${referralData?.referral_code}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     };
 
@@ -117,8 +117,8 @@ const ReferralPage = () => {
                         </h1>
                         <p className="text-muted-foreground max-w-xl mx-auto">
                             {isRomanian 
-                                ? 'Primește £5 pentru fiecare prieten care se înregistrează și face prima achiziție. Prietenul tău primește și el £5!'
-                                : 'Get £5 for every friend who signs up and makes their first purchase. Your friend gets £5 too!'
+                                ? 'Primește RON 5 pentru fiecare prieten care se înregistrează și face prima achiziție. Prietenul tău primește și el RON 5!'
+                                : 'Get RON 5 for every friend who signs up and makes their first purchase. Your friend gets RON 5 too!'
                             }
                         </p>
                     </div>
@@ -152,7 +152,7 @@ const ReferralPage = () => {
                                 <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-3">
                                     <Gift className="w-6 h-6 text-secondary" />
                                 </div>
-                                <p className="text-3xl font-bold text-secondary">£{referralData?.total_earned || 0}</p>
+                                <p className="text-3xl font-bold text-secondary">RON {referralData?.total_earned || 0}</p>
                                 <p className="text-sm text-muted-foreground">
                                     {isRomanian ? 'Total Câștigat' : 'Total Earned'}
                                 </p>
@@ -241,8 +241,8 @@ const ReferralPage = () => {
                             </div>
                             <p className="text-sm text-muted-foreground mt-2">
                                 {isRomanian 
-                                    ? 'Aplică un cod înainte de prima ta achiziție pentru a primi £5 bonus!'
-                                    : 'Apply a code before your first purchase to get £5 bonus!'
+                                    ? 'Aplică un cod înainte de prima ta achiziție pentru a primi RON 5 bonus!'
+                                    : 'Apply a code before your first purchase to get RON 5 bonus!'
                                 }
                             </p>
                         </CardContent>
@@ -328,8 +328,8 @@ const ReferralPage = () => {
                                     <h4 className="font-bold mb-2">{isRomanian ? 'Câștigați Amândoi' : 'Both Earn'}</h4>
                                     <p className="text-sm text-muted-foreground">
                                         {isRomanian 
-                                            ? 'Tu și prietenul primești £5 bonus!'
-                                            : 'You and friend each get £5 bonus!'
+                                            ? 'Tu și prietenul primești RON 5 bonus!'
+                                            : 'You and friend each get RON 5 bonus!'
                                         }
                                     </p>
                                 </div>

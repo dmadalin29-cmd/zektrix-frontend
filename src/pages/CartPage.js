@@ -192,7 +192,7 @@ const CartPage = () => {
                                             <div className="flex-1">
                                                 <h3 className="font-bold mb-1">{item.title}</h3>
                                                 <p className="text-sm text-muted-foreground mb-3">
-                                                    £{item.ticket_price.toFixed(2)} {isRomanian ? 'per bilet' : 'per ticket'}
+                                                    RON {item.ticket_price.toFixed(2)} {isRomanian ? 'per bilet' : 'per ticket'}
                                                 </p>
                                                 
                                                 <div className="flex items-center justify-between">
@@ -219,7 +219,7 @@ const CartPage = () => {
                                                     
                                                     <div className="flex items-center gap-4">
                                                         <span className="font-bold text-lg">
-                                                            £{(item.quantity * item.ticket_price).toFixed(2)}
+                                                            RON {(item.quantity * item.ticket_price).toFixed(2)}
                                                         </span>
                                                         <Button
                                                             variant="ghost"
@@ -249,12 +249,12 @@ const CartPage = () => {
                                         <span className="text-muted-foreground">
                                             {isRomanian ? 'Subtotal' : 'Subtotal'}
                                         </span>
-                                        <span>£{totalPrice.toFixed(2)}</span>
+                                        <span>RON {totalPrice.toFixed(2)}</span>
                                     </div>
                                     <div className="border-t border-white/10 pt-4">
                                         <div className="flex justify-between text-lg font-bold">
                                             <span>{isRomanian ? 'Total' : 'Total'}</span>
-                                            <span className="gradient-text">£{totalPrice.toFixed(2)}</span>
+                                            <span className="gradient-text">RON {totalPrice.toFixed(2)}</span>
                                         </div>
                                     </div>
 
@@ -279,7 +279,7 @@ const CartPage = () => {
                                                                 {isRomanian ? 'Portofel' : 'Wallet'}
                                                             </p>
                                                             <p className="text-xs text-muted-foreground">
-                                                                {isRomanian ? 'Sold' : 'Balance'}: £{(user?.balance || 0).toFixed(2)}
+                                                                {isRomanian ? 'Sold' : 'Balance'}: RON {(user?.balance || 0).toFixed(2)}
                                                             </p>
                                                         </div>
                                                         {paymentMethod === 'wallet' && (
@@ -317,8 +317,8 @@ const CartPage = () => {
                                             {paymentMethod === 'wallet' && (user?.balance || 0) < totalPrice && (
                                                 <p className="text-sm text-destructive">
                                                     {isRomanian 
-                                                        ? `Sold insuficient. Adaugă £${(totalPrice - (user?.balance || 0)).toFixed(2)}`
-                                                        : `Insufficient balance. Add £${(totalPrice - (user?.balance || 0)).toFixed(2)}`
+                                                        ? `Sold insuficient. Adaugă RON ${(totalPrice - (user?.balance || 0)).toFixed(2)}`
+                                                        : `Insufficient balance. Add RON ${(totalPrice - (user?.balance || 0)).toFixed(2)}`
                                                     }
                                                 </p>
                                             )}

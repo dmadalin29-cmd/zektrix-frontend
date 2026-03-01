@@ -148,7 +148,7 @@ const CompetitionsPage = () => {
                                 </div>
                                 <div className="glass rounded-2xl p-6 text-center">
                                     <p className="text-3xl font-black text-accent font-mono">
-                                        £{Math.min(...competitions.filter(c => c.status === 'active').map(c => c.ticket_price) || [0]).toFixed(2)}
+                                        RON {Math.min(...competitions.filter(c => c.status === 'active').map(c => c.ticket_price) || [0]).toFixed(2)}
                                     </p>
                                     <p className="text-sm text-muted-foreground mt-1">
                                         {isRomanian ? 'Preț Minim' : 'From'}
