@@ -58,14 +58,14 @@ const Navbar = () => {
                     
                     {/* TikTok Link */}
                     <a
-                        href="https://www.tiktok.com/@x67.uk"
+                        href="https://www.tiktok.com/@x67digital.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
                         data-testid="tiktok-link"
                     >
                         <TikTokIcon className="w-4 h-4" />
-                        <span>@x67.uk</span>
+                        <span>@x67digital.com</span>
                     </a>
                 </div>
 
@@ -73,7 +73,7 @@ const Navbar = () => {
                 <div className="flex items-center gap-2">
                     {/* TikTok Link Mobile */}
                     <a
-                        href="https://www.tiktok.com/@x67.uk"
+                        href="https://www.tiktok.com/@x67digital.com"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="md:hidden"
@@ -218,13 +218,13 @@ const Navbar = () => {
                                 
                                 {/* TikTok Link */}
                                 <a
-                                    href="https://www.tiktok.com/@x67.uk"
+                                    href="https://www.tiktok.com/@x67digital.com"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300"
                                 >
                                     <TikTokIcon className="w-5 h-5" />
-                                    <span className="text-lg font-semibold">@x67.uk</span>
+                                    <span className="text-lg font-semibold">@x67digital.com</span>
                                     <span className="ml-auto px-2 py-1 text-xs bg-secondary/20 text-secondary rounded-full">TikTok</span>
                                 </a>
                                 

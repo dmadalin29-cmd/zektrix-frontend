@@ -130,7 +130,7 @@ const HomePage = () => {
                         </div>
                         <div className="flex items-center gap-3">
                             <a
-                                href="https://www.tiktok.com/@x67.uk"
+                                href="https://www.tiktok.com/@x67digital.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="btn-secondary flex items-center gap-2 text-sm"
@@ -142,12 +142,12 @@ const HomePage = () => {
                                 {t('watch_live') || 'Urmărește LIVE'}
                             </a>
                             <a
-                                href="https://www.tiktok.com/@x67.uk"
+                                href="https://www.tiktok.com/@x67digital.com"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="text-white/70 hover:text-white transition-colors text-sm font-medium"
                             >
-                                @x67.uk
+                                @x67digital.com
                             </a>
                         </div>
                     </div>
