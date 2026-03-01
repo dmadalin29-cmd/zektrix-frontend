@@ -88,7 +88,7 @@ const HomePage = () => {
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
                             <div className="text-center">
-                                <p className="text-3xl md:text-4xl font-black gradient-text">£50K+</p>
+                                <p className="text-3xl md:text-4xl font-black gradient-text">250K+</p>
                                 <p className="text-sm text-muted-foreground mt-1">{t('stat_prizes')}</p>
                             </div>
                             <div className="text-center">
@@ -161,7 +161,7 @@ const HomePage = () => {
                                             <div className="flex items-center justify-between mb-4">
                                                 <div>
                                                     <p className="text-xs text-muted-foreground">{t('ticket_price')}</p>
-                                                    <p className="text-2xl font-bold text-primary">£{comp.ticket_price.toFixed(2)}</p>
+                                                    <p className="text-2xl font-bold text-primary">RON {comp.ticket_price.toFixed(2)}</p>
                                                 </div>
                                                 <div className="text-right">
                                                     <p className="text-xs text-muted-foreground">{t('tickets_left')}</p>
