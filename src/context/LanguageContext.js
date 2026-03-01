@@ -14,6 +14,7 @@ const translations = {
         nav_wallet: "Portofel",
         nav_admin: "Admin",
         nav_logout: "Deconectare",
+        nav_cart: "Coș",
 
         // Homepage
         hero_badge: "Platforma #1 de Competiții din UK",
@@ -377,6 +378,7 @@ const translations = {
         nav_wallet: "Wallet",
         nav_admin: "Admin Panel",
         nav_logout: "Log Out",
+        nav_cart: "Cart",
 
         // Homepage
         hero_badge: "UK's Premier Competition Platform",
