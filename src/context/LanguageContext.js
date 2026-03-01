@@ -4,7 +4,7 @@ const translations = {
     ro: {
         // Navbar
         nav_competitions: "Competiții",
-        nav_winners: "Câștigători",
+        nav_winners: "Premianți",
         nav_find_tickets: "Caută Bilete",
         nav_faq: "Întrebări",
         nav_signin: "Conectare",
@@ -367,7 +367,7 @@ const translations = {
     en: {
         // Navbar
         nav_competitions: "Competitions",
-        nav_winners: "Winners",
+        nav_winners: "Results",
         nav_find_tickets: "Find Tickets",
         nav_faq: "FAQ",
         nav_signin: "Sign In",
