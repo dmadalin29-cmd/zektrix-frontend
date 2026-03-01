@@ -138,7 +138,7 @@ const CompetitionCard = ({ competition, featured = false }) => {
                 <div className="flex gap-2">
                     <Button 
                         className="flex-1 btn-primary text-sm py-3"
-                        onClick={(e) => e.preventDefault()}
+                        data-testid={`view-details-${competition.competition_id}`}
                     >
                         {isRomanian ? 'Vezi Detalii' : 'View Details'}
                         <ArrowRight className="w-4 h-4 ml-2" />

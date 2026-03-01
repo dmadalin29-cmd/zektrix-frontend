@@ -23,6 +23,10 @@ import CartPage from "./pages/CartPage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentFailedPage from "./pages/PaymentFailedPage";
 
+// Global Components
+import InstallPrompt from "./components/InstallPrompt";
+import CookieConsent from "./components/CookieConsent";
+
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false }) => {
     const { isAuthenticated, isAdmin, loading } = useAuth();
@@ -149,6 +153,8 @@ function App() {
                             <AppRouter />
                         </BrowserRouter>
                         <Toaster position="top-right" richColors closeButton />
+                        <InstallPrompt />
+                        <CookieConsent />
                     </div>
                 </CartProvider>
             </AuthProvider>
