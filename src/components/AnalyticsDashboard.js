@@ -43,7 +43,7 @@ const AnalyticsDashboard = () => {
     const stats = [
         { 
             label: isRomanian ? 'Venit Total' : 'Total Revenue', 
-            value: `£${analytics?.total_revenue?.toFixed(2) || 0}`, 
+            value: `RON ${analytics?.total_revenue?.toFixed(2) || 0}`, 
             icon: PoundSterling, 
             color: 'text-green-500',
             bg: 'bg-green-500/20'
@@ -143,7 +143,7 @@ const AnalyticsDashboard = () => {
                                         </p>
                                     </div>
                                 </div>
-                                <Badge className="badge-secondary">£{comp.revenue?.toFixed(2)}</Badge>
+                                <Badge className="badge-secondary">RON {comp.revenue?.toFixed(2)}</Badge>
                             </div>
                         ))}
                         {(!analytics?.top_competitions || analytics.top_competitions.length === 0) && (
@@ -174,7 +174,7 @@ const AnalyticsDashboard = () => {
                                         key={index} 
                                         className="flex-1 bg-gradient-to-t from-primary to-secondary rounded-t-sm transition-all hover:opacity-80"
                                         style={{ height: `${Math.max(height, 2)}%` }}
-                                        title={`${day.date}: £${day.revenue.toFixed(2)}`}
+                                        title={`${day.date}: RON ${day.revenue.toFixed(2)}`}
                                     />
                                 );
                             })}

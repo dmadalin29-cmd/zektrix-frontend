@@ -467,7 +467,7 @@ const CompetitionDetailPage = () => {
                                 <CardHeader>
                                     <CardTitle className="flex items-center justify-between">
                                         <span>{isRomanian ? 'Cumpără Bilete' : 'Buy Tickets'}</span>
-                                        <span className="price-display">£{competition.ticket_price.toFixed(2)}</span>
+                                        <span className="price-display">RON {competition.ticket_price.toFixed(2)}</span>
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-6">
@@ -530,7 +530,7 @@ const CompetitionDetailPage = () => {
                                             {/* Total */}
                                             <div className="flex justify-between items-center py-4 border-y border-white/10">
                                                 <span className="text-muted-foreground">{isRomanian ? 'Total' : 'Total'}</span>
-                                                <span className="text-3xl font-black gradient-text font-mono">£{totalCost.toFixed(2)}</span>
+                                                <span className="text-3xl font-black gradient-text font-mono">RON {totalCost.toFixed(2)}</span>
                                             </div>
 
                                             {/* Payment Methods */}
@@ -551,7 +551,7 @@ const CompetitionDetailPage = () => {
                                                         <div className="flex-1 text-left">
                                                             <p className="font-medium">{isRomanian ? 'Portofel' : 'Wallet'}</p>
                                                             <p className="text-xs text-muted-foreground font-mono">
-                                                                £{(user?.balance || 0).toFixed(2)} {isRomanian ? 'disponibil' : 'available'}
+                                                                RON {(user?.balance || 0).toFixed(2)} {isRomanian ? 'disponibil' : 'available'}
                                                             </p>
                                                         </div>
                                                     </button>
@@ -586,8 +586,8 @@ const CompetitionDetailPage = () => {
                                             {isAuthenticated && paymentMethod === 'wallet' && (user?.balance || 0) < totalCost && (
                                                 <p className="text-sm text-destructive">
                                                     {isRomanian 
-                                                        ? `Sold insuficient. Adaugă £${(totalCost - (user?.balance || 0)).toFixed(2)}`
-                                                        : `Insufficient balance. Add £${(totalCost - (user?.balance || 0)).toFixed(2)}`
+                                                        ? `Sold insuficient. Adaugă RON ${(totalCost - (user?.balance || 0)).toFixed(2)}`
+                                                        : `Insufficient balance. Add RON ${(totalCost - (user?.balance || 0)).toFixed(2)}`
                                                     }
                                                 </p>
                                             )}

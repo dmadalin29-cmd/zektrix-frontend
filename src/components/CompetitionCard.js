@@ -120,7 +120,7 @@ const CompetitionCard = ({ competition, featured = false }) => {
                         <span>{isRomanian ? 'rămase' : 'left'}</span>
                     </div>
                     <div className="price-display text-xl">
-                        £{competition.ticket_price.toFixed(2)}
+                        RON {competition.ticket_price.toFixed(2)}
                     </div>
                 </div>
 

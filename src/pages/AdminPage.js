@@ -411,7 +411,7 @@ const AdminPage = () => {
                                                         </div>
                                                         <p className="text-sm text-muted-foreground mb-2">{comp.description}</p>
                                                         <div className="flex gap-4 text-sm">
-                                                            <span>Price: <strong>£{comp.ticket_price.toFixed(2)}</strong></span>
+                                                            <span>Price: <strong>RON {comp.ticket_price.toFixed(2)}</strong></span>
                                                             <span>Sold: <strong>{comp.sold_tickets}/{comp.max_tickets}</strong></span>
                                                             {comp.winner_ticket && <span className="text-secondary">Winner: <strong>#{comp.winner_ticket}</strong></span>}
                                                         </div>
@@ -465,7 +465,7 @@ const AdminPage = () => {
                                                         <tr key={u.user_id} data-testid={`admin-user-${u.user_id}`}>
                                                             <td className="font-medium">{u.username}</td>
                                                             <td className="text-muted-foreground">{u.email}</td>
-                                                            <td className="text-secondary font-bold">£{(u.balance || 0).toFixed(2)}</td>
+                                                            <td className="text-secondary font-bold">RON {(u.balance || 0).toFixed(2)}</td>
                                                             <td>
                                                                 <Badge className={u.role === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted'}>
                                                                     {u.role}
@@ -609,7 +609,7 @@ const AdminPage = () => {
                                 <Textarea value={compForm.description} onChange={(e) => setCompForm(prev => ({ ...prev, description: e.target.value }))} className="input-modern" required data-testid="comp-desc-input" />
                             </div>
                             <div>
-                                <Label>Ticket Price (£)</Label>
+                                <Label>Ticket Price (RON )</Label>
                                 <Input type="number" step="0.01" value={compForm.ticket_price} onChange={(e) => setCompForm(prev => ({ ...prev, ticket_price: e.target.value }))} className="input-modern" required data-testid="comp-price-input" />
                             </div>
                             <div>
@@ -687,9 +687,9 @@ const AdminPage = () => {
                     </DialogHeader>
                     <form onSubmit={handleUserSubmit} className="space-y-4">
                         <div>
-                            <Label>Balance Adjustment (£)</Label>
+                            <Label>Balance Adjustment (RON )</Label>
                             <Input type="number" step="0.01" value={userForm.balance_change} onChange={(e) => setUserForm(prev => ({ ...prev, balance_change: e.target.value }))} className="input-modern" placeholder="+10 or -5" data-testid="user-balance-input" />
-                            <p className="text-xs text-muted-foreground mt-1">Current: £{(editingUser?.balance || 0).toFixed(2)}</p>
+                            <p className="text-xs text-muted-foreground mt-1">Current: RON {(editingUser?.balance || 0).toFixed(2)}</p>
                         </div>
                         <div>
                             <Label>New Password (leave empty to keep current)</Label>

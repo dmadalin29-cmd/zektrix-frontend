@@ -79,7 +79,7 @@ const Navbar = () => {
                             {/* Wallet Balance */}
                             <Link to="/dashboard" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 transition-colors" data-testid="wallet-balance-btn">
                                 <Wallet className="w-4 h-4 text-secondary" />
-                                <span className="text-sm font-bold font-mono text-secondary">£{(user?.balance || 0).toFixed(2)}</span>
+                                <span className="text-sm font-bold font-mono text-secondary">RON {(user?.balance || 0).toFixed(2)}</span>
                             </Link>
 
                             {/* User Menu */}
