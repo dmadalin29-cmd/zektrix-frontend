@@ -1,0 +1,155 @@
+import React from "react";
+import "@/App.css";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
+import { CartProvider } from "./context/CartContext";
+import { Toaster } from "./components/ui/sonner";
+
+// Pages
+import HomePage from "./pages/HomePage";
+import LoginPage from "./pages/LoginPage";
+import AuthCallback from "./pages/AuthCallback";
+import DashboardPage from "./pages/DashboardPage";
+import CompetitionsPage from "./pages/CompetitionsPage";
+import CompetitionDetailPage from "./pages/CompetitionDetailPage";
+import WinnersPage from "./pages/WinnersPage";
+import SearchTicketsPage from "./pages/SearchTicketsPage";
+import FAQPage from "./pages/FAQPage";
+import TermsPage from "./pages/TermsPage";
+import AdminPage from "./pages/AdminPage";
+import ReferralPage from "./pages/ReferralPage";
+import CartPage from "./pages/CartPage";
+
+// Protected Route Component
+const ProtectedRoute = ({ children, adminOnly = false }) => {
+    const { isAuthenticated, isAdmin, loading } = useAuth();
+    const location = useLocation();
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!isAuthenticated) {
+        return <Navigate to="/login" state={{ from: location }} replace />;
+    }
+
+    if (adminOnly && !isAdmin) {
+        return <Navigate to="/dashboard" replace />;
+    }
+
+    return children;
+};
+
+// App Router with session_id detection
+const AppRouter = () => {
+    const location = useLocation();
+
+    // Check URL fragment (not query params) for session_id
+    // This must happen BEFORE ProtectedRoute to handle OAuth callback
+    if (location.hash?.includes('session_id=')) {
+        return <AuthCallback />;
+    }
+
+    return (
+        <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/competitions" element={<CompetitionsPage />} />
+            <Route path="/competitions/:id" element={<CompetitionDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/winners" element={<WinnersPage />} />
+            <Route path="/search" element={<SearchTicketsPage />} />
+            <Route path="/faq" element={<FAQPage />} />
+            <Route path="/terms" element={<TermsPage />} />
+
+            {/* Protected Routes */}
+            <Route
+                path="/dashboard"
+                element={
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/dashboard/tickets"
+                element={
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/dashboard/wallet"
+                element={
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/dashboard/history"
+                element={
+                    <ProtectedRoute>
+                        <DashboardPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/dashboard/referral"
+                element={
+                    <ProtectedRoute>
+                        <ReferralPage />
+                    </ProtectedRoute>
+                }
+            />
+            <Route
+                path="/referral"
+                element={
+                    <ProtectedRoute>
+                        <ReferralPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Admin Routes */}
+            <Route
+                path="/admin"
+                element={
+                    <ProtectedRoute adminOnly>
+                        <AdminPage />
+                    </ProtectedRoute>
+                }
+            />
+
+            {/* Catch all - redirect to home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+    );
+};
+
+function App() {
+    return (
+        <LanguageProvider>
+            <AuthProvider>
+                <CartProvider>
+                    <div className="App dark">
+                        <BrowserRouter>
+                            <AppRouter />
+                        </BrowserRouter>
+                        <Toaster position="top-right" richColors closeButton />
+                    </div>
+                </CartProvider>
+            </AuthProvider>
+        </LanguageProvider>
+    );
+}
+
+export default App;
