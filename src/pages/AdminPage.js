@@ -1100,28 +1100,74 @@ const AdminPage = () => {
 
                     {/* ============== CHAT TAB ============== */}
                     {tab === 'chat' && (
-                        <div className="rounded-2xl p-6 max-h-[70vh] overflow-y-auto"
-                            style={{
-                                background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
-                                border: '1px solid rgba(139, 92, 246, 0.15)'
-                            }}>
-                            {chatMsgs.length === 0 ? (
-                                <EmptyState icon={MessageCircle} title="Niciun mesaj" description="Mesajele de la utilizatori vor apărea aici." />
-                            ) : chatMsgs.map((m, i) => (
-                                <div key={i} className="flex items-start gap-3 p-4 rounded-xl hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors">
-                                    <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                                        style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.3))' }}>
-                                        <User className="w-5 h-5 text-violet-300" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <p className="font-medium text-white">{m.user_email || 'Anonim'}</p>
-                                            <p className="text-xs text-gray-500">{new Date(m.created_at).toLocaleString('ro-RO')}</p>
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-3 mb-4">
+                                <Badge className="bg-violet-500/20 text-violet-400 px-3 py-1.5">{chatMsgs.length} Mesaje</Badge>
+                                <Badge className="bg-yellow-500/20 text-yellow-400 px-3 py-1.5">{chatMsgs.filter(m => m.status === 'pending').length} Nerezolvate</Badge>
+                            </div>
+                            <div className="space-y-3">
+                                {chatMsgs.length === 0 ? (
+                                    <EmptyState icon={MessageCircle} title="Niciun mesaj" description="Mesajele de la utilizatori vor apărea aici." />
+                                ) : chatMsgs.map((m) => (
+                                    <div key={m.message_id} 
+                                        className={`rounded-2xl p-5 transition-all ${m.status === 'replied' ? 'opacity-70' : ''}`}
+                                        style={{
+                                            background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                            border: m.status === 'pending' ? '1px solid rgba(251, 191, 36, 0.3)' : '1px solid rgba(139, 92, 246, 0.15)'
+                                        }}
+                                    >
+                                        <div className="flex items-start gap-4">
+                                            <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
+                                                style={{ background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(6, 182, 212, 0.3))' }}>
+                                                <User className="w-6 h-6 text-violet-300" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    <p className="font-bold text-white">{m.username}</p>
+                                                    <Badge className={m.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-emerald-500/20 text-emerald-400'}>
+                                                        {m.status === 'pending' ? 'Așteaptă răspuns' : 'Răspuns trimis'}
+                                                    </Badge>
+                                                </div>
+                                                <p className="text-xs text-gray-500 mb-3">{new Date(m.created_at).toLocaleString('ro-RO')}</p>
+                                                <div className="p-3 rounded-xl bg-white/5 mb-3">
+                                                    <p className="text-gray-300">{m.message}</p>
+                                                </div>
+                                                {m.admin_reply && (
+                                                    <div className="p-3 rounded-xl mb-3"
+                                                        style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05))', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                                        <p className="text-xs text-emerald-400 mb-1">Răspunsul tău:</p>
+                                                        <p className="text-gray-300">{m.admin_reply}</p>
+                                                    </div>
+                                                )}
+                                                {m.status === 'pending' && (
+                                                    <div className="flex gap-2">
+                                                        <Input 
+                                                            id={`reply-${m.message_id}`}
+                                                            placeholder="Scrie răspunsul..." 
+                                                            className="bg-white/5 border-white/10 flex-1"
+                                                        />
+                                                        <Button 
+                                                            onClick={async () => {
+                                                                const input = document.getElementById(`reply-${m.message_id}`);
+                                                                const reply = input?.value;
+                                                                if (!reply) { toast.error('Scrie un răspuns'); return; }
+                                                                try {
+                                                                    await axios.post(`${API}/admin/chat/reply`, { message_id: m.message_id, reply }, { headers: { Authorization: `Bearer ${token}` }});
+                                                                    toast.success('Răspuns trimis!');
+                                                                    fetchAll();
+                                                                } catch { toast.error('Eroare'); }
+                                                            }}
+                                                            className="bg-violet-600 hover:bg-violet-500"
+                                                        >
+                                                            Trimite
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                        <p className="text-gray-300">{m.message}</p>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

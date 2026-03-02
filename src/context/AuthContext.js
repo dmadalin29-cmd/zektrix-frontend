@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -15,34 +15,54 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+    // Initialize state from localStorage synchronously
     const [user, setUser] = useState(() => {
-        // Try to restore user from localStorage on initial load
-        const savedUser = localStorage.getItem('user');
-        return savedUser ? JSON.parse(savedUser) : null;
+        try {
+            const savedUser = localStorage.getItem('zektrix_user');
+            return savedUser ? JSON.parse(savedUser) : null;
+        } catch {
+            return null;
+        }
     });
+    const [token, setToken] = useState(() => localStorage.getItem('zektrix_token'));
     const [loading, setLoading] = useState(true);
-    const [token, setToken] = useState(() => localStorage.getItem('token'));
+    const authCheckDone = useRef(false);
+    const retryCount = useRef(0);
 
-    const saveAuth = (newToken, userData) => {
-        if (newToken) {
-            localStorage.setItem('token', newToken);
-            setToken(newToken);
+    const saveAuth = useCallback((newToken, userData) => {
+        try {
+            if (newToken) {
+                localStorage.setItem('zektrix_token', newToken);
+                setToken(newToken);
+            }
+            if (userData) {
+                localStorage.setItem('zektrix_user', JSON.stringify(userData));
+                setUser(userData);
+            }
+        } catch (e) {
+            console.warn('Failed to save auth to localStorage:', e);
         }
-        if (userData) {
-            localStorage.setItem('user', JSON.stringify(userData));
-            setUser(userData);
-        }
-    };
+    }, []);
 
-    const clearAuth = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+    const clearAuth = useCallback(() => {
+        try {
+            localStorage.removeItem('zektrix_token');
+            localStorage.removeItem('zektrix_user');
+            // Also clear old keys for migration
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+        } catch (e) {
+            console.warn('Failed to clear localStorage:', e);
+        }
         setToken(null);
         setUser(null);
-    };
+    }, []);
 
     const checkAuth = useCallback(async () => {
-        // Skip if OAuth callback
+        // Prevent multiple checks
+        if (authCheckDone.current) return;
+        
+        // Skip if OAuth callback in progress
         const searchParams = new URLSearchParams(window.location.search);
         const hashParams = new URLSearchParams(window.location.hash?.replace('#', ''));
         
@@ -51,47 +71,118 @@ export const AuthProvider = ({ children }) => {
             return;
         }
 
-        const storedToken = localStorage.getItem('token');
-        const storedUser = localStorage.getItem('user');
+        // Try to get token from new key first, then fall back to old key
+        let storedToken = localStorage.getItem('zektrix_token');
+        let storedUser = localStorage.getItem('zektrix_user');
+        
+        // Migration from old keys
+        if (!storedToken) {
+            storedToken = localStorage.getItem('token');
+            storedUser = localStorage.getItem('user');
+            if (storedToken) {
+                // Migrate to new keys
+                localStorage.setItem('zektrix_token', storedToken);
+                if (storedUser) localStorage.setItem('zektrix_user', storedUser);
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+            }
+        }
         
         if (!storedToken) {
+            authCheckDone.current = true;
             setLoading(false);
             return;
         }
 
-        // Set token immediately from storage
+        // Set token immediately
         setToken(storedToken);
         
-        // If we have cached user data, use it immediately
+        // Use cached user data immediately for faster UX
         if (storedUser) {
             try {
-                setUser(JSON.parse(storedUser));
+                const parsedUser = JSON.parse(storedUser);
+                setUser(parsedUser);
             } catch (e) {
                 console.warn('Failed to parse stored user');
             }
         }
 
-        // Then verify with server in background
+        // Verify with server
         try {
             const response = await axios.get(`${API}/auth/me`, {
-                headers: { Authorization: `Bearer ${storedToken}` }
+                headers: { Authorization: `Bearer ${storedToken}` },
+                timeout: 10000 // 10 second timeout
             });
-            // Update with fresh data from server
+            
+            // Update with fresh data
             saveAuth(storedToken, response.data);
+            retryCount.current = 0;
+            
         } catch (error) {
+            console.warn('Auth check failed:', error?.response?.status || error.message);
+            
             if (error.response?.status === 401) {
-                // Token is truly invalid
+                // Token is definitely invalid - clear only after 401
                 clearAuth();
+            } else if (error.response?.status === 403) {
+                // User might be blocked
+                clearAuth();
+            } else {
+                // Network error, timeout, or server error - KEEP using cached data
+                // Don't clear auth for temporary network issues
+                console.log('Network issue, keeping cached auth data');
+                
+                // Retry once after 3 seconds for network errors
+                if (retryCount.current < 1) {
+                    retryCount.current++;
+                    setTimeout(() => {
+                        authCheckDone.current = false;
+                        checkAuth();
+                    }, 3000);
+                }
             }
-            // For network errors, keep using cached data
         } finally {
+            authCheckDone.current = true;
             setLoading(false);
         }
-    }, []);
+    }, [saveAuth, clearAuth]);
 
     useEffect(() => {
         checkAuth();
-    }, [checkAuth]);
+        
+        // Re-check auth on window focus (user comes back to tab)
+        const handleFocus = () => {
+            if (token) {
+                authCheckDone.current = false;
+                checkAuth();
+            }
+        };
+        
+        window.addEventListener('focus', handleFocus);
+        return () => window.removeEventListener('focus', handleFocus);
+    }, [checkAuth, token]);
+
+    // Handle storage changes from other tabs
+    useEffect(() => {
+        const handleStorageChange = (e) => {
+            if (e.key === 'zektrix_token') {
+                if (e.newValue) {
+                    setToken(e.newValue);
+                } else {
+                    setToken(null);
+                    setUser(null);
+                }
+            }
+            if (e.key === 'zektrix_user' && e.newValue) {
+                try {
+                    setUser(JSON.parse(e.newValue));
+                } catch {}
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
 
     const login = async (email, password) => {
         const response = await axios.post(`${API}/auth/login`, { email, password });
@@ -129,11 +220,12 @@ export const AuthProvider = ({ children }) => {
         if (!token) return;
         try {
             const response = await axios.get(`${API}/auth/me`, {
-                headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: 10000
             });
             saveAuth(token, response.data);
         } catch (error) {
-            console.error('Failed to refresh user');
+            console.error('Failed to refresh user:', error?.message);
         }
     };
 
