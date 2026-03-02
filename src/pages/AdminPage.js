@@ -900,9 +900,9 @@ const AdminPage = () => {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-white">{t.competition_title || t.competition_id}</p>
-                                                <p className="text-sm text-gray-500">{t.user_first_name} {t.user_last_name} • {t.user_email}</p>
+                                                <p className="text-sm text-gray-500">{t.full_name || t.username} • {t.email || 'N/A'}</p>
                                             </div>
-                                            <p className="text-xs text-gray-500 hidden sm:block">{new Date(t.purchase_date).toLocaleDateString('ro-RO')}</p>
+                                            <p className="text-xs text-gray-500 hidden sm:block">{t.purchased_at ? new Date(t.purchased_at).toLocaleDateString('ro-RO') : 'N/A'}</p>
                                         </div>
                                     </div>
                                 ))}
