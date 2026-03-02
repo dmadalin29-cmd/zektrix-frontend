@@ -1,21 +1,135 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, Outlet, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import Navbar from '../components/Navbar';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 import { toast } from 'sonner';
 import axios from 'axios';
-import { Wallet, Ticket, History, Plus, ArrowRight, Loader2, Trophy, CreditCard, PoundSterling, ArrowUpRight, Clock, Gift, Users } from 'lucide-react';
+import { 
+    AreaChart, Area, ResponsiveContainer
+} from 'recharts';
+import { 
+    Wallet, Ticket, History, Plus, ArrowRight, Loader2, Trophy, CreditCard, 
+    ArrowUpRight, ArrowDownRight, Clock, Gift, Users, TrendingUp, Sparkles,
+    ChevronRight, Eye, Target, Crown, Star, Zap, Calendar, DollarSign,
+    ShoppingCart, Activity, Bell
+} from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Animated Number
+const AnimatedNumber = ({ value, prefix = '', suffix = '', decimals = 2 }) => {
+    const [display, setDisplay] = useState(0);
+    useEffect(() => {
+        const duration = 1200;
+        const steps = 40;
+        const increment = value / steps;
+        let current = 0;
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= value) { setDisplay(value); clearInterval(timer); }
+            else setDisplay(current);
+        }, duration / steps);
+        return () => clearInterval(timer);
+    }, [value]);
+    return <span>{prefix}{decimals > 0 ? display.toFixed(decimals) : Math.floor(display).toLocaleString('ro-RO')}{suffix}</span>;
+};
+
+// Sparkline
+const Sparkline = ({ data, color, height = 40 }) => (
+    <div style={{ width: '100%', height }}>
+        <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data.map((v, i) => ({ v, i }))}>
+                <defs>
+                    <linearGradient id={`spark-${color.replace('#', '')}`} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={color} stopOpacity={0.4}/>
+                        <stop offset="100%" stopColor={color} stopOpacity={0}/>
+                    </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey="v" stroke={color} strokeWidth={2} fill={`url(#spark-${color.replace('#', '')})`} />
+            </AreaChart>
+        </ResponsiveContainer>
+    </div>
+);
+
+// Stat Card
+const StatCard = ({ icon: Icon, label, value, gradient, sparkData, onClick, prefix = '' }) => (
+    <div 
+        onClick={onClick}
+        className={`group relative rounded-2xl p-5 transition-all duration-500 hover:scale-[1.02] ${onClick ? 'cursor-pointer' : ''}`}
+        style={{
+            background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+            border: '1px solid rgba(139, 92, 246, 0.15)',
+            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.3)'
+        }}
+    >
+        <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            style={{ background: `radial-gradient(circle at 50% 50%, ${gradient?.split(' ')[0] || 'rgba(139,92,246,0.15)'}, transparent 70%)` }} />
+        <div className="relative z-10">
+            <div className="flex items-start justify-between mb-4">
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110`}
+                    style={{ background: gradient || 'linear-gradient(135deg, #8b5cf6, #7c3aed)' }}>
+                    <Icon className="w-6 h-6 text-white" />
+                </div>
+            </div>
+            <p className="text-sm text-gray-400 mb-1 font-medium">{label}</p>
+            <p className="text-3xl font-bold text-white tracking-tight">
+                <AnimatedNumber value={value} prefix={prefix} decimals={prefix === 'RON ' ? 2 : 0} />
+            </p>
+            {sparkData && (
+                <div className="mt-4 -mx-1">
+                    <Sparkline data={sparkData} color={gradient?.includes('emerald') ? '#10b981' : gradient?.includes('orange') ? '#f97316' : '#8b5cf6'} />
+                </div>
+            )}
+        </div>
+    </div>
+);
+
+// Nav Tab
+const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
+    <button
+        onClick={onClick}
+        className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-300 whitespace-nowrap
+            ${active 
+                ? 'text-white' 
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+        style={active ? {
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.3) 0%, rgba(124, 58, 237, 0.2) 100%)',
+            boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
+        } : {}}
+    >
+        <Icon className={`w-4 h-4 ${active ? 'text-violet-400' : ''}`} />
+        <span>{label}</span>
+        {badge !== undefined && badge > 0 && (
+            <span className="px-1.5 py-0.5 bg-violet-500/30 text-violet-300 text-xs font-bold rounded-full min-w-[20px] text-center">
+                {badge}
+            </span>
+        )}
+    </button>
+);
+
+// Empty State
+const EmptyState = ({ icon: Icon, title, description, action, actionLabel }) => (
+    <div className="flex flex-col items-center justify-center py-16 text-center">
+        <div className="w-20 h-20 rounded-2xl bg-violet-500/10 flex items-center justify-center mb-4">
+            <Icon className="w-10 h-10 text-violet-400" />
+        </div>
+        <h3 className="text-lg font-bold text-white mb-2">{title}</h3>
+        <p className="text-gray-500 max-w-md mb-6">{description}</p>
+        {action && (
+            <Button onClick={action} className="bg-violet-600 hover:bg-violet-500">
+                {actionLabel}
+            </Button>
+        )}
+    </div>
+);
 
 const DashboardPage = () => {
     const { user, token, refreshUser } = useAuth();
@@ -23,11 +137,11 @@ const DashboardPage = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Determine which tab based on route
     const getActiveTab = () => {
         if (location.pathname.includes('/tickets')) return 'tickets';
         if (location.pathname.includes('/wallet')) return 'wallet';
         if (location.pathname.includes('/history')) return 'history';
+        if (location.pathname.includes('/referral')) return 'referral';
         return 'overview';
     };
 
@@ -39,13 +153,8 @@ const DashboardPage = () => {
     const [depositing, setDepositing] = useState(false);
     const [showDepositDialog, setShowDepositDialog] = useState(false);
 
-    useEffect(() => {
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        setActiveTab(getActiveTab());
-    }, [location.pathname]);
+    useEffect(() => { fetchData(); }, []);
+    useEffect(() => { setActiveTab(getActiveTab()); }, [location.pathname]);
 
     const fetchData = async () => {
         try {
@@ -68,7 +177,6 @@ const DashboardPage = () => {
             toast.error('Minimum deposit is RON 1');
             return;
         }
-
         setDepositing(true);
         try {
             const response = await axios.post(
@@ -76,8 +184,6 @@ const DashboardPage = () => {
                 { amount },
                 { headers: { Authorization: `Bearer ${token}` } }
             );
-            
-            // Redirect to Viva checkout
             window.location.href = response.data.checkout_url;
         } catch (error) {
             toast.error(error.response?.data?.detail || 'Failed to create deposit');
@@ -87,392 +193,423 @@ const DashboardPage = () => {
 
     const handleTabChange = (value) => {
         setActiveTab(value);
-        switch (value) {
-            case 'overview':
-                navigate('/dashboard');
-                break;
-            case 'tickets':
-                navigate('/dashboard/tickets');
-                break;
-            case 'wallet':
-                navigate('/dashboard/wallet');
-                break;
-            case 'history':
-                navigate('/dashboard/history');
-                break;
-            case 'referral':
-                navigate('/dashboard/referral');
-                break;
-            default:
-                break;
-        }
+        const routes = { overview: '/dashboard', tickets: '/dashboard/tickets', wallet: '/dashboard/wallet', history: '/dashboard/history', referral: '/dashboard/referral' };
+        navigate(routes[value] || '/dashboard');
     };
 
-    // Group tickets by competition
     const groupedTickets = tickets.reduce((acc, ticket) => {
         const key = ticket.competition_id;
-        if (!acc[key]) {
-            acc[key] = {
-                competition_id: ticket.competition_id,
-                competition_title: ticket.competition_title,
-                tickets: []
-            };
-        }
+        if (!acc[key]) acc[key] = { competition_id: ticket.competition_id, competition_title: ticket.competition_title, tickets: [] };
         acc[key].tickets.push(ticket);
         return acc;
     }, {});
 
     const recentTransactions = transactions.slice(0, 5);
+    const sparkData = useMemo(() => [20, 35, 25, 45, 55, 40, 60, 50, 70, 65, 80, 75], []);
+
+    const navItems = [
+        { id: 'overview', icon: Activity, label: isRomanian ? 'Prezentare' : 'Overview' },
+        { id: 'tickets', icon: Ticket, label: isRomanian ? 'Biletele Mele' : 'My Tickets', badge: tickets.length },
+        { id: 'wallet', icon: Wallet, label: isRomanian ? 'Portofel' : 'Wallet' },
+        { id: 'history', icon: History, label: isRomanian ? 'Istoric' : 'History' },
+        { id: 'referral', icon: Gift, label: 'Referral' },
+    ];
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-[#030014]" data-testid="dashboard-page">
             <Navbar />
             
             <main className="pt-24 pb-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-8">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold mb-2">
-                                {t('welcome')}, <span className="gradient-text">{user?.username}</span>
+                            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+                                {t('welcome')}, <span className="bg-gradient-to-r from-violet-400 to-fuchsia-400 bg-clip-text text-transparent">{user?.first_name || user?.username}</span>
                             </h1>
-                            <p className="text-muted-foreground">{t('dashboard_subtitle')}</p>
+                            <p className="text-gray-500">{t('dashboard_subtitle')}</p>
                         </div>
-                        <Card className="glass border-secondary/30 w-fit">
-                            <CardContent className="p-4 flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center">
-                                    <Wallet className="w-6 h-6 text-secondary" />
-                                </div>
-                                <div>
-                                    <p className="text-xs text-muted-foreground">{t('your_balance')}</p>
-                                    <p className="text-2xl font-bold text-secondary" data-testid="wallet-balance">
-                                        RON {(user?.balance || 0).toFixed(2)}
-                                    </p>
-                                </div>
-                                <Button 
-                                    size="sm" 
-                                    className="btn-secondary ml-4"
-                                    onClick={() => setShowDepositDialog(true)}
-                                    data-testid="add-funds-btn"
-                                >
-                                    <Plus className="w-4 h-4 mr-1" />
-                                    {t('add')}
-                                </Button>
-                            </CardContent>
-                        </Card>
+                        
+                        {/* Balance Card */}
+                        <div className="rounded-2xl p-5 flex items-center gap-5"
+                            style={{
+                                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.1) 100%)',
+                                border: '1px solid rgba(249, 115, 22, 0.3)',
+                                boxShadow: '0 0 30px rgba(249, 115, 22, 0.15)'
+                            }}>
+                            <div className="w-14 h-14 rounded-xl flex items-center justify-center"
+                                style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)' }}>
+                                <Wallet className="w-7 h-7 text-white" />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-400 font-medium">{t('your_balance')}</p>
+                                <p className="text-3xl font-bold text-white" data-testid="wallet-balance">
+                                    RON <AnimatedNumber value={user?.balance || 0} decimals={2} />
+                                </p>
+                            </div>
+                            <Button 
+                                onClick={() => setShowDepositDialog(true)}
+                                className="ml-4 bg-orange-500 hover:bg-orange-600 text-white font-bold px-5"
+                                data-testid="add-funds-btn"
+                            >
+                                <Plus className="w-4 h-4 mr-2" />
+                                {isRomanian ? 'ADAUGĂ' : 'ADD'}
+                            </Button>
+                        </div>
                     </div>
 
-                    {/* Tabs */}
-                    <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-                        <TabsList className="bg-muted p-1 h-auto flex-wrap">
-                            <TabsTrigger value="overview" className="data-[state=active]:bg-primary/20" data-testid="tab-overview">
-                                {t('tab_overview')}
-                            </TabsTrigger>
-                            <TabsTrigger value="tickets" className="data-[state=active]:bg-primary/20" data-testid="tab-tickets">
-                                <Ticket className="w-4 h-4 mr-2" />
-                                {t('tab_tickets')}
-                            </TabsTrigger>
-                            <TabsTrigger value="wallet" className="data-[state=active]:bg-primary/20" data-testid="tab-wallet">
-                                <Wallet className="w-4 h-4 mr-2" />
-                                {t('tab_wallet')}
-                            </TabsTrigger>
-                            <TabsTrigger value="history" className="data-[state=active]:bg-primary/20" data-testid="tab-history">
-                                <History className="w-4 h-4 mr-2" />
-                                {t('tab_history')}
-                            </TabsTrigger>
-                            <TabsTrigger value="referral" className="data-[state=active]:bg-primary/20" data-testid="tab-referral">
-                                <Gift className="w-4 h-4 mr-2" />
-                                {isRomanian ? 'Referral' : 'Referral'}
-                            </TabsTrigger>
-                        </TabsList>
+                    {/* Navigation Tabs */}
+                    <div className="flex gap-2 mb-8 overflow-x-auto pb-2 hide-scrollbar">
+                        {navItems.map(item => (
+                            <NavTab 
+                                key={item.id}
+                                {...item}
+                                active={activeTab === item.id}
+                                onClick={() => handleTabChange(item.id)}
+                            />
+                        ))}
+                    </div>
 
+                    {/* Content */}
+                    <div className="space-y-6">
                         {/* Overview Tab */}
-                        <TabsContent value="overview" className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <Card className="glass border-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                                                <Ticket className="w-6 h-6 text-primary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Total Tickets</p>
-                                                <p className="text-2xl font-bold">{tickets.length}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card className="glass border-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-secondary/20 flex items-center justify-center">
-                                                <Trophy className="w-6 h-6 text-secondary" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Competitions</p>
-                                                <p className="text-2xl font-bold">{Object.keys(groupedTickets).length}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                                <Card className="glass border-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                                                <History className="w-6 h-6 text-accent" />
-                                            </div>
-                                            <div>
-                                                <p className="text-sm text-muted-foreground">Transactions</p>
-                                                <p className="text-2xl font-bold">{transactions.length}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
+                        {activeTab === 'overview' && (
+                            <>
+                                {/* Stats Grid */}
+                                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                                    <StatCard 
+                                        icon={Ticket} 
+                                        label="Total Tickets" 
+                                        value={tickets.length} 
+                                        gradient="linear-gradient(135deg, #8b5cf6, #7c3aed)" 
+                                        sparkData={sparkData}
+                                        onClick={() => handleTabChange('tickets')}
+                                    />
+                                    <StatCard 
+                                        icon={Trophy} 
+                                        label="Competitions" 
+                                        value={Object.keys(groupedTickets).length} 
+                                        gradient="linear-gradient(135deg, #f97316, #ea580c)" 
+                                    />
+                                    <StatCard 
+                                        icon={History} 
+                                        label="Transactions" 
+                                        value={transactions.length} 
+                                        gradient="linear-gradient(135deg, #06b6d4, #0891b2)" 
+                                        onClick={() => handleTabChange('history')}
+                                    />
+                                </div>
 
-                            {/* Quick Actions */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Link to="/competitions">
-                                    <Card className="glass border-white/10 card-hover h-full">
-                                        <CardContent className="p-6 flex items-center justify-between">
-                                            <div>
-                                                <h3 className="font-bold mb-1">Browse Competitions</h3>
-                                                <p className="text-sm text-muted-foreground">Enter exciting competitions and win prizes</p>
+                                {/* Quick Actions */}
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <Link to="/competitions" className="group">
+                                        <div className="rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02]"
+                                            style={{
+                                                background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                                border: '1px solid rgba(139, 92, 246, 0.15)'
+                                            }}>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h3 className="font-bold text-white text-lg mb-1">Browse Competitions</h3>
+                                                    <p className="text-sm text-gray-500">Enter exciting competitions and win prizes</p>
+                                                </div>
+                                                <div className="w-12 h-12 rounded-xl bg-violet-500/20 flex items-center justify-center group-hover:bg-violet-500/30 transition-colors">
+                                                    <ArrowRight className="w-6 h-6 text-violet-400" />
+                                                </div>
                                             </div>
-                                            <ArrowRight className="w-5 h-5 text-primary" />
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                                <Card 
-                                    className="glass border-white/10 card-hover cursor-pointer"
-                                    onClick={() => setShowDepositDialog(true)}
-                                >
-                                    <CardContent className="p-6 flex items-center justify-between">
-                                        <div>
-                                            <h3 className="font-bold mb-1">Add Funds</h3>
-                                            <p className="text-sm text-muted-foreground">Deposit money to your wallet</p>
                                         </div>
-                                        <Plus className="w-5 h-5 text-secondary" />
-                                    </CardContent>
-                                </Card>
-                            </div>
+                                    </Link>
+                                    <div className="group cursor-pointer" onClick={() => setShowDepositDialog(true)}>
+                                        <div className="rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02]"
+                                            style={{
+                                                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%)',
+                                                border: '1px solid rgba(249, 115, 22, 0.2)'
+                                            }}>
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h3 className="font-bold text-white text-lg mb-1">Add Funds</h3>
+                                                    <p className="text-sm text-gray-500">Deposit money to your wallet</p>
+                                                </div>
+                                                <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center group-hover:bg-orange-500/30 transition-colors">
+                                                    <Plus className="w-6 h-6 text-orange-400" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            {/* Recent Activity */}
-                            {recentTransactions.length > 0 && (
-                                <Card className="glass border-white/10">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">Recent Activity</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="space-y-4">
+                                {/* Recent Activity */}
+                                {recentTransactions.length > 0 && (
+                                    <div className="rounded-2xl p-6"
+                                        style={{
+                                            background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                            border: '1px solid rgba(139, 92, 246, 0.15)'
+                                        }}>
+                                        <div className="flex items-center justify-between mb-5">
+                                            <h3 className="font-bold text-white text-lg">Recent Activity</h3>
+                                            <Button variant="ghost" size="sm" onClick={() => handleTabChange('history')} className="text-violet-400 hover:text-violet-300">
+                                                View All <ChevronRight className="w-4 h-4 ml-1" />
+                                            </Button>
+                                        </div>
+                                        <div className="space-y-3">
                                             {recentTransactions.map((txn) => (
-                                                <div key={txn.transaction_id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                                                <div key={txn.transaction_id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 hover:bg-white/10 transition-colors">
                                                     <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                                                            txn.amount > 0 ? 'bg-secondary/20' : 'bg-primary/20'
+                                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                                                            txn.amount > 0 ? 'bg-emerald-500/20' : 'bg-violet-500/20'
                                                         }`}>
                                                             {txn.amount > 0 ? (
-                                                                <ArrowUpRight className="w-4 h-4 text-secondary" />
+                                                                <ArrowUpRight className="w-5 h-5 text-emerald-400" />
                                                             ) : (
-                                                                <Ticket className="w-4 h-4 text-primary" />
+                                                                <Ticket className="w-5 h-5 text-violet-400" />
                                                             )}
                                                         </div>
                                                         <div>
-                                                            <p className="text-sm font-medium">{txn.description}</p>
-                                                            <p className="text-xs text-muted-foreground">
-                                                                {new Date(txn.created_at).toLocaleDateString()}
+                                                            <p className="text-sm font-medium text-white">{txn.description}</p>
+                                                            <p className="text-xs text-gray-500">
+                                                                {new Date(txn.created_at).toLocaleDateString('ro-RO')}
                                                             </p>
                                                         </div>
                                                     </div>
-                                                    <span className={`font-bold ${txn.amount > 0 ? 'text-secondary' : 'text-primary'}`}>
+                                                    <span className={`font-bold ${txn.amount > 0 ? 'text-emerald-400' : 'text-violet-400'}`}>
                                                         {txn.amount > 0 ? '+' : ''}RON {Math.abs(txn.amount).toFixed(2)}
                                                     </span>
                                                 </div>
                                             ))}
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-                        </TabsContent>
+                                    </div>
+                                )}
+                            </>
+                        )}
 
                         {/* Tickets Tab */}
-                        <TabsContent value="tickets" className="space-y-6">
-                            {loading ? (
+                        {activeTab === 'tickets' && (
+                            loading ? (
                                 <div className="flex justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
                                 </div>
                             ) : Object.keys(groupedTickets).length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid md:grid-cols-2 gap-4">
                                     {Object.values(groupedTickets).map((group) => (
-                                        <Card key={group.competition_id} className="glass border-white/10" data-testid={`tickets-group-${group.competition_id}`}>
-                                            <CardHeader>
-                                                <CardTitle className="text-lg flex items-center justify-between">
-                                                    <span>{group.competition_title || 'Competition'}</span>
-                                                    <Badge className="badge-instant">{group.tickets.length} tickets</Badge>
-                                                </CardTitle>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {group.tickets.sort((a, b) => a.ticket_number - b.ticket_number).map((ticket) => (
-                                                        <span key={ticket.ticket_id} className="ticket-badge">
-                                                            #{ticket.ticket_number}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                                <Link to={`/competitions/${group.competition_id}`}>
-                                                    <Button variant="link" className="text-primary p-0 mt-4">
-                                                        View Competition <ArrowRight className="w-4 h-4 ml-1" />
-                                                    </Button>
-                                                </Link>
-                                            </CardContent>
-                                        </Card>
+                                        <div key={group.competition_id} 
+                                            className="rounded-2xl p-5 transition-all duration-300 hover:scale-[1.01]"
+                                            style={{
+                                                background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                                border: '1px solid rgba(139, 92, 246, 0.15)'
+                                            }}
+                                            data-testid={`tickets-group-${group.competition_id}`}
+                                        >
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold text-white">{group.competition_title || 'Competition'}</h3>
+                                                <Badge className="bg-violet-500/20 text-violet-400 border-violet-500/30">
+                                                    {group.tickets.length} tickets
+                                                </Badge>
+                                            </div>
+                                            <div className="flex flex-wrap gap-2 mb-4">
+                                                {group.tickets.sort((a, b) => a.ticket_number - b.ticket_number).map((ticket) => (
+                                                    <span key={ticket.ticket_id} 
+                                                        className="px-3 py-1.5 rounded-lg font-mono font-bold text-sm"
+                                                        style={{
+                                                            background: 'linear-gradient(135deg, #8b5cf6, #f97316)',
+                                                            boxShadow: '0 0 15px rgba(139, 92, 246, 0.3)'
+                                                        }}>
+                                                        #{ticket.ticket_number}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <Link to={`/competitions/${group.competition_id}`}>
+                                                <Button variant="ghost" size="sm" className="text-violet-400 hover:text-violet-300 p-0">
+                                                    View Competition <ArrowRight className="w-4 h-4 ml-1" />
+                                                </Button>
+                                            </Link>
+                                        </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-16">
-                                    <Ticket className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                                    <h3 className="text-xl font-bold mb-2">No Tickets Yet</h3>
-                                    <p className="text-muted-foreground mb-4">Purchase tickets to enter competitions</p>
-                                    <Link to="/competitions">
-                                        <Button className="btn-primary">
-                                            Browse Competitions
-                                        </Button>
-                                    </Link>
-                                </div>
-                            )}
-                        </TabsContent>
+                                <EmptyState 
+                                    icon={Ticket} 
+                                    title="No Tickets Yet" 
+                                    description="Purchase tickets to enter competitions"
+                                    action={() => navigate('/competitions')}
+                                    actionLabel="Browse Competitions"
+                                />
+                            )
+                        )}
 
                         {/* Wallet Tab */}
-                        <TabsContent value="wallet" className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <Card className="glass border-secondary/30">
-                                    <CardContent className="p-8 text-center">
-                                        <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
-                                            <Wallet className="w-8 h-8 text-secondary" />
-                                        </div>
-                                        <p className="text-sm text-muted-foreground mb-2">Available Balance</p>
-                                        <p className="text-4xl font-bold text-secondary mb-6">
-                                            RON {(user?.balance || 0).toFixed(2)}
-                                        </p>
-                                        <Button 
-                                            className="btn-secondary w-full"
-                                            onClick={() => setShowDepositDialog(true)}
-                                            data-testid="deposit-btn"
-                                        >
-                                            <Plus className="w-4 h-4 mr-2" />
-                                            Add Funds
-                                        </Button>
-                                    </CardContent>
-                                </Card>
+                        {activeTab === 'wallet' && (
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="rounded-2xl p-8 text-center"
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.1) 100%)',
+                                        border: '1px solid rgba(249, 115, 22, 0.3)',
+                                        boxShadow: '0 0 40px rgba(249, 115, 22, 0.1)'
+                                    }}>
+                                    <div className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                                        style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 0 30px rgba(249, 115, 22, 0.4)' }}>
+                                        <Wallet className="w-10 h-10 text-white" />
+                                    </div>
+                                    <p className="text-sm text-gray-400 mb-2">Available Balance</p>
+                                    <p className="text-5xl font-bold text-white mb-8">
+                                        RON <AnimatedNumber value={user?.balance || 0} decimals={2} />
+                                    </p>
+                                    <Button 
+                                        onClick={() => setShowDepositDialog(true)}
+                                        className="w-full py-6 text-lg font-bold bg-orange-500 hover:bg-orange-600"
+                                        data-testid="deposit-btn"
+                                    >
+                                        <Plus className="w-5 h-5 mr-2" />
+                                        Add Funds
+                                    </Button>
+                                </div>
 
-                                <Card className="glass border-white/10">
-                                    <CardHeader>
-                                        <CardTitle className="text-lg">Payment Methods</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/50 mb-4">
-                                            <CreditCard className="w-8 h-8 text-accent" />
-                                            <div>
-                                                <p className="font-medium">Viva Payments</p>
-                                                <p className="text-sm text-muted-foreground">Secure card payments</p>
-                                            </div>
+                                <div className="rounded-2xl p-6"
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                        border: '1px solid rgba(139, 92, 246, 0.15)'
+                                    }}>
+                                    <h3 className="font-bold text-white text-lg mb-4">Payment Methods</h3>
+                                    <div className="flex items-center gap-4 p-4 rounded-xl bg-white/5 mb-4">
+                                        <CreditCard className="w-10 h-10 text-cyan-400" />
+                                        <div>
+                                            <p className="font-medium text-white">Viva Payments</p>
+                                            <p className="text-sm text-gray-500">Secure card payments</p>
                                         </div>
-                                        <p className="text-xs text-muted-foreground">
-                                            All payments are processed securely through Viva Payments. We never store your card details.
-                                        </p>
-                                    </CardContent>
-                                </Card>
+                                    </div>
+                                    <div className="flex gap-4 mb-4">
+                                        <div className="flex-1 p-3 rounded-xl bg-white/5 text-center">
+                                            <svg viewBox="0 0 48 48" className="w-8 h-8 mx-auto mb-1"><rect fill="#1565C0" x="6" y="14" width="36" height="20" rx="3"/><path fill="#FFF" d="M22.2 24.5l-2.4-5.4h1.7l1.5 3.7 1.5-3.7h1.6l-2.4 5.4h-1.5zm-5.5 0h-1.5v-5.4h1.5v5.4zm11.7 0H27v-5.4h1.4v5.4zm2.5-4.1c0-.8.7-1.4 1.5-1.4.5 0 .9.2 1.2.5l-.6.8c-.2-.2-.4-.3-.6-.3-.4 0-.7.3-.7.7s.3.7.7.7c.2 0 .4-.1.6-.3l.6.8c-.3.3-.7.5-1.2.5-.8 0-1.5-.6-1.5-1.4v-.6z"/></svg>
+                                            <p className="text-[10px] text-gray-500">Visa</p>
+                                        </div>
+                                        <div className="flex-1 p-3 rounded-xl bg-white/5 text-center">
+                                            <svg viewBox="0 0 48 48" className="w-8 h-8 mx-auto mb-1"><circle fill="#FF9800" cx="20" cy="24" r="10"/><circle fill="#F44336" cx="28" cy="24" r="10"/><path fill="#FF5722" d="M24 17.3c2.3 1.8 3.8 4.5 3.8 7.7s-1.5 5.9-3.8 7.7c-2.3-1.8-3.8-4.5-3.8-7.7s1.5-5.9 3.8-7.7z"/></svg>
+                                            <p className="text-[10px] text-gray-500">Mastercard</p>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-gray-500">
+                                        All payments are processed securely. We never store your card details.
+                                    </p>
+                                </div>
                             </div>
-                        </TabsContent>
+                        )}
 
                         {/* History Tab */}
-                        <TabsContent value="history" className="space-y-6">
-                            {loading ? (
+                        {activeTab === 'history' && (
+                            loading ? (
                                 <div className="flex justify-center py-12">
-                                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                    <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
                                 </div>
                             ) : transactions.length > 0 ? (
-                                <Card className="glass border-white/10">
-                                    <CardContent className="p-0">
-                                        <div className="overflow-x-auto">
-                                            <table className="w-full table-modern">
-                                                <thead>
-                                                    <tr className="border-b border-white/10">
-                                                        <th>Date</th>
-                                                        <th>Type</th>
-                                                        <th>Description</th>
-                                                        <th>Status</th>
-                                                        <th className="text-right">Amount</th>
+                                <div className="rounded-2xl overflow-hidden"
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                        border: '1px solid rgba(139, 92, 246, 0.15)'
+                                    }}>
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full">
+                                            <thead>
+                                                <tr className="border-b border-white/10">
+                                                    <th className="text-left text-xs font-bold uppercase tracking-wider text-violet-400 py-4 px-5">Date</th>
+                                                    <th className="text-left text-xs font-bold uppercase tracking-wider text-violet-400 py-4 px-5">Type</th>
+                                                    <th className="text-left text-xs font-bold uppercase tracking-wider text-violet-400 py-4 px-5">Description</th>
+                                                    <th className="text-left text-xs font-bold uppercase tracking-wider text-violet-400 py-4 px-5">Status</th>
+                                                    <th className="text-right text-xs font-bold uppercase tracking-wider text-violet-400 py-4 px-5">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {transactions.map((txn) => (
+                                                    <tr key={txn.transaction_id} className="border-b border-white/5 hover:bg-white/5 transition-colors" data-testid={`txn-${txn.transaction_id}`}>
+                                                        <td className="py-4 px-5 text-sm text-gray-300">
+                                                            {new Date(txn.created_at).toLocaleDateString('ro-RO')}
+                                                        </td>
+                                                        <td className="py-4 px-5">
+                                                            <Badge className="bg-violet-500/20 text-violet-400 border-violet-500/30 capitalize">
+                                                                {txn.transaction_type.replace('_', ' ')}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className="py-4 px-5 text-sm text-gray-400">{txn.description}</td>
+                                                        <td className="py-4 px-5">
+                                                            <Badge className={
+                                                                txn.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
+                                                                txn.status === 'pending' ? 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30' :
+                                                                'bg-red-500/20 text-red-400 border-red-500/30'
+                                                            }>
+                                                                {txn.status}
+                                                            </Badge>
+                                                        </td>
+                                                        <td className={`py-4 px-5 text-right font-bold ${txn.amount > 0 ? 'text-emerald-400' : 'text-violet-400'}`}>
+                                                            {txn.amount > 0 ? '+' : ''}RON {Math.abs(txn.amount).toFixed(2)}
+                                                        </td>
                                                     </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {transactions.map((txn) => (
-                                                        <tr key={txn.transaction_id} data-testid={`txn-${txn.transaction_id}`}>
-                                                            <td className="text-sm">
-                                                                {new Date(txn.created_at).toLocaleDateString()}
-                                                            </td>
-                                                            <td>
-                                                                <Badge variant="outline" className="capitalize">
-                                                                    {txn.transaction_type.replace('_', ' ')}
-                                                                </Badge>
-                                                            </td>
-                                                            <td className="text-sm text-muted-foreground">
-                                                                {txn.description}
-                                                            </td>
-                                                            <td>
-                                                                <Badge className={
-                                                                    txn.status === 'completed' ? 'status-active' :
-                                                                    txn.status === 'pending' ? 'status-completed' :
-                                                                    'bg-destructive/20 text-destructive'
-                                                                }>
-                                                                    {txn.status}
-                                                                </Badge>
-                                                            </td>
-                                                            <td className={`text-right font-bold ${
-                                                                txn.amount > 0 ? 'text-secondary' : 'text-primary'
-                                                            }`}>
-                                                                {txn.amount > 0 ? '+' : ''}RON {Math.abs(txn.amount).toFixed(2)}
-                                                            </td>
-                                                        </tr>
-                                                    ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ) : (
-                                <div className="text-center py-16">
-                                    <History className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                                    <h3 className="text-xl font-bold mb-2">No Transaction History</h3>
-                                    <p className="text-muted-foreground">Your transaction history will appear here</p>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
-                            )}
-                        </TabsContent>
-                    </Tabs>
+                            ) : (
+                                <EmptyState 
+                                    icon={History} 
+                                    title="No Transaction History" 
+                                    description="Your transaction history will appear here"
+                                />
+                            )
+                        )}
+
+                        {/* Referral Tab */}
+                        {activeTab === 'referral' && (
+                            <div className="rounded-2xl p-8 text-center"
+                                style={{
+                                    background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
+                                    border: '1px solid rgba(139, 92, 246, 0.15)'
+                                }}>
+                                <div className="w-20 h-20 rounded-2xl mx-auto mb-6 flex items-center justify-center"
+                                    style={{ background: 'linear-gradient(135deg, #8b5cf6, #f97316)', boxShadow: '0 0 30px rgba(139, 92, 246, 0.4)' }}>
+                                    <Gift className="w-10 h-10 text-white" />
+                                </div>
+                                <h3 className="text-2xl font-bold text-white mb-2">Referral Program</h3>
+                                <p className="text-gray-400 mb-6 max-w-md mx-auto">
+                                    {isRomanian 
+                                        ? 'Invită prietenii și primești bonusuri pentru fiecare care se înregistrează!' 
+                                        : 'Invite friends and get bonuses for each one who signs up!'}
+                                </p>
+                                <div className="p-4 rounded-xl bg-white/5 mb-6 max-w-md mx-auto">
+                                    <p className="text-xs text-gray-500 mb-2">Your Referral Code</p>
+                                    <p className="text-2xl font-mono font-bold text-violet-400">{user?.referral_code || 'ZEKTRIX' + (user?.user_id?.slice(-4) || '0000')}</p>
+                                </div>
+                                <Button className="bg-violet-600 hover:bg-violet-500" onClick={() => {
+                                    navigator.clipboard.writeText(`https://zektrix.uk?ref=${user?.referral_code || 'ZEKTRIX'}`);
+                                    toast.success(isRomanian ? 'Link copiat!' : 'Link copied!');
+                                }}>
+                                    Copy Referral Link
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </main>
 
             {/* Deposit Dialog */}
             <Dialog open={showDepositDialog} onOpenChange={setShowDepositDialog}>
-                <DialogContent className="sm:max-w-md glass border-white/10">
+                <DialogContent className="sm:max-w-md"
+                    style={{ background: 'linear-gradient(135deg, rgba(10, 6, 20, 0.98) 0%, rgba(5, 3, 15, 0.99) 100%)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
                     <DialogHeader>
-                        <DialogTitle>Add Funds</DialogTitle>
-                        <DialogDescription>
+                        <DialogTitle className="text-white text-xl">Add Funds</DialogTitle>
+                        <DialogDescription className="text-gray-400">
                             Deposit money to your wallet using Viva Payments
                         </DialogDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-4">
                         <div className="space-y-2">
-                            <Label htmlFor="amount">Amount (RON )</Label>
+                            <Label htmlFor="amount" className="text-gray-400">Amount (RON)</Label>
                             <div className="relative">
-                                <PoundSterling className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
                                 <Input
                                     id="amount"
                                     type="number"
                                     placeholder="10.00"
                                     value={depositAmount}
                                     onChange={(e) => setDepositAmount(e.target.value)}
-                                    className="pl-10 input-modern"
+                                    className="pl-10 bg-white/5 border-white/10 focus:border-violet-500"
                                     min="1"
                                     step="0.01"
                                     data-testid="deposit-amount-input"
@@ -486,7 +623,7 @@ const DashboardPage = () => {
                                     variant="outline"
                                     size="sm"
                                     onClick={() => setDepositAmount(amt.toString())}
-                                    className="border-white/20"
+                                    className="border-white/20 hover:border-violet-500 hover:bg-violet-500/20"
                                 >
                                     RON {amt}
                                 </Button>
@@ -494,11 +631,9 @@ const DashboardPage = () => {
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowDepositDialog(false)}>
-                            Cancel
-                        </Button>
+                        <Button variant="outline" onClick={() => setShowDepositDialog(false)}>Cancel</Button>
                         <Button 
-                            className="btn-secondary"
+                            className="bg-orange-500 hover:bg-orange-600"
                             onClick={handleDeposit}
                             disabled={depositing || !depositAmount}
                             data-testid="confirm-deposit-btn"
