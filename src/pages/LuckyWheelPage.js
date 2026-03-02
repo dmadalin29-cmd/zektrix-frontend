@@ -22,7 +22,6 @@ const LuckyWheelPage = () => {
     const [showResult, setShowResult] = useState(false);
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(true);
-    const wheelRef = useRef(null);
 
     useEffect(() => {
         fetchPrizes();
@@ -67,12 +66,39 @@ const LuckyWheelPage = () => {
 
             const { prize_index, prize, message } = response.data;
             
-            const segmentAngle = 360 / prizes.length;
-            const targetAngle = segmentAngle * prize_index + segmentAngle / 2;
-            const spins = 6;
-            const finalRotation = rotation + (360 * spins) + (360 - targetAngle);
+            // FIXED: Correct rotation calculation
+            // Pointer is at TOP (12 o'clock position)
+            // Wheel rotates clockwise
+            // Each segment spans (360 / numPrizes) degrees
+            // First segment (index 0) starts at 0 degrees (right side) and goes counter-clockwise
             
-            setRotation(finalRotation);
+            const numPrizes = prizes.length;
+            const segmentAngle = 360 / numPrizes;
+            
+            // The segment at index 0 is at the right (3 o'clock)
+            // To land on a segment, we need to position its CENTER under the pointer (top/12 o'clock)
+            // Segment center is at: segmentAngle * index + segmentAngle/2 degrees from right
+            // Pointer is at top (90 degrees from right in standard coords)
+            // But CSS rotation goes clockwise from top
+            
+            // For CSS: 0deg = top, rotation goes clockwise
+            // Segment 0 starts at top-right, segment centers are at:
+            // Segment 0 center: segmentAngle/2 from start
+            // Segment N center: segmentAngle * N + segmentAngle/2
+            
+            // To align segment N's center with top pointer:
+            // We need to rotate so that position goes to 0 (top)
+            const segmentCenterPosition = (segmentAngle * prize_index) + (segmentAngle / 2);
+            
+            // Add full rotations for visual effect
+            const fullSpins = 5;
+            const baseRotation = fullSpins * 360;
+            
+            // Final rotation: go past the target and land on it
+            // We subtract because we want that segment to come to top
+            const finalRotation = baseRotation + (360 - segmentCenterPosition);
+            
+            setRotation(prev => prev + finalRotation);
             
             setTimeout(() => {
                 setSpinning(false);
@@ -93,16 +119,16 @@ const LuckyWheelPage = () => {
         }
     };
 
-    // Elegant color palette - no casino colors
+    // Elegant color palette
     const elegantColors = [
-        '#8b5cf6', // violet
-        '#06b6d4', // cyan
-        '#10b981', // emerald
-        '#6366f1', // indigo
-        '#0ea5e9', // sky
-        '#14b8a6', // teal
-        '#7c3aed', // purple
-        '#0891b2', // dark cyan
+        '#10b981', // emerald - 5 RON
+        '#3b82f6', // blue - 10 RON
+        '#8b5cf6', // violet - 25 RON  
+        '#f59e0b', // amber - 50 RON
+        '#ec4899', // pink - 1 Bilet
+        '#14b8a6', // teal - +10% Bonus
+        '#f97316', // orange - +25% Bonus
+        '#6b7280', // gray - Mai încearcă
     ];
 
     if (loading) {
@@ -125,7 +151,7 @@ const LuckyWheelPage = () => {
                         <span>{isRomanian ? 'Înapoi' : 'Back'}</span>
                     </Link>
 
-                    {/* Header - Clean & Professional */}
+                    {/* Header */}
                     <div className="text-center mb-10">
                         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-500/10 border border-violet-500/20 mb-4">
                             <Sparkles className="w-4 h-4 text-violet-400" />
@@ -136,19 +162,20 @@ const LuckyWheelPage = () => {
                         </h1>
                         <p className="text-gray-400 max-w-md mx-auto">
                             {isRomanian 
-                                ? 'Învârte roata o dată pe zi pentru a primi bonusuri și reduceri exclusive.' 
-                                : 'Spin the wheel once daily for exclusive bonuses and discounts.'}
+                                ? 'Învârte roata o dată pe zi pentru bonusuri exclusive.' 
+                                : 'Spin the wheel once daily for exclusive bonuses.'}
                         </p>
                     </div>
 
-                    {/* Wheel Container - Clean Design */}
+                    {/* Wheel Container */}
                     <div className="relative flex flex-col items-center">
-                        {/* Pointer - Minimal */}
+                        {/* Pointer at TOP */}
                         <div className="absolute top-0 z-20 -mt-1">
-                            <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-violet-500" />
+                            <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-t-[30px] border-l-transparent border-r-transparent border-t-violet-500" 
+                                style={{ filter: 'drop-shadow(0 2px 4px rgba(139, 92, 246, 0.5))' }} />
                         </div>
 
-                        {/* Wheel - Professional Look */}
+                        {/* Wheel */}
                         <div className="relative w-[300px] h-[300px] md:w-[380px] md:h-[380px]">
                             <div className="absolute inset-0 rounded-full p-1"
                                 style={{
@@ -156,37 +183,46 @@ const LuckyWheelPage = () => {
                                     boxShadow: '0 0 40px rgba(139, 92, 246, 0.2)'
                                 }}>
                                 <div 
-                                    ref={wheelRef}
                                     className="w-full h-full rounded-full relative overflow-hidden"
                                     style={{
                                         transform: `rotate(${rotation}deg)`,
                                         transition: spinning ? 'transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99)' : 'none',
-                                        background: `conic-gradient(${prizes.map((p, i) => 
-                                            `${elegantColors[i % elegantColors.length]} ${(i/prizes.length)*100}% ${((i+1)/prizes.length)*100}%`
-                                        ).join(', ')})`
+                                        background: `conic-gradient(${prizes.map((p, i) => {
+                                            const color = elegantColors[i % elegantColors.length];
+                                            const start = (i / prizes.length) * 100;
+                                            const end = ((i + 1) / prizes.length) * 100;
+                                            return `${color} ${start}% ${end}%`;
+                                        }).join(', ')})`
                                     }}
                                 >
-                                    {/* Prize Labels */}
+                                    {/* Prize Labels - positioned in center of each segment */}
                                     {prizes.map((prize, index) => {
-                                        const angle = (360 / prizes.length) * index + (360 / prizes.length / 2);
+                                        const segmentAngle = 360 / prizes.length;
+                                        // Label angle: center of segment, measured from top (0deg)
+                                        // Since conic-gradient starts from top and goes clockwise
+                                        const labelAngle = segmentAngle * index + segmentAngle / 2;
+                                        
                                         return (
                                             <div
                                                 key={index}
-                                                className="absolute text-white text-[9px] md:text-[11px] font-semibold whitespace-nowrap"
+                                                className="absolute text-white text-[9px] md:text-[11px] font-semibold"
                                                 style={{
                                                     left: '50%',
                                                     top: '50%',
-                                                    transform: `rotate(${angle}deg) translateX(55px) md:translateX(70px)`,
-                                                    transformOrigin: 'left center',
-                                                    textShadow: '1px 1px 3px rgba(0,0,0,0.5)'
+                                                    transform: `rotate(${labelAngle}deg) translateY(-65px) md:translateY(-85px)`,
+                                                    transformOrigin: 'center center',
+                                                    textShadow: '1px 1px 3px rgba(0,0,0,0.7)',
+                                                    whiteSpace: 'nowrap'
                                                 }}
                                             >
-                                                {prize.label}
+                                                <span style={{ display: 'inline-block', transform: 'translateX(-50%)' }}>
+                                                    {prize.label}
+                                                </span>
                                             </div>
                                         );
                                     })}
                                     
-                                    {/* Center - Clean */}
+                                    {/* Center */}
                                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center bg-[#0a0614] border-2 border-violet-500/50">
                                         <Gift className="w-6 h-6 md:w-8 md:h-8 text-violet-400" />
                                     </div>
@@ -194,7 +230,7 @@ const LuckyWheelPage = () => {
                             </div>
                         </div>
 
-                        {/* Spin Button - Clean */}
+                        {/* Spin Button */}
                         <Button
                             onClick={spinWheel}
                             disabled={!canSpin || spinning || !user}
@@ -227,7 +263,7 @@ const LuckyWheelPage = () => {
                         )}
                     </div>
 
-                    {/* Prize Legend - Clean Cards */}
+                    {/* Prize Legend */}
                     <div className="mt-12 rounded-2xl p-5"
                         style={{
                             background: 'linear-gradient(135deg, rgba(15, 10, 30, 0.9) 0%, rgba(10, 6, 20, 0.95) 100%)',
@@ -248,7 +284,7 @@ const LuckyWheelPage = () => {
                         </div>
                     </div>
 
-                    {/* Info - Clean */}
+                    {/* Info */}
                     <div className="grid md:grid-cols-3 gap-3 mt-4">
                         {[
                             { icon: Star, title: isRomanian ? 'Zilnic' : 'Daily', desc: isRomanian ? 'O învârtire gratuită' : 'One free spin' },
@@ -265,7 +301,7 @@ const LuckyWheelPage = () => {
                 </div>
             </main>
 
-            {/* Result Modal - Clean */}
+            {/* Result Modal */}
             <Dialog open={showResult} onOpenChange={setShowResult}>
                 <DialogContent className="text-center"
                     style={{ background: 'linear-gradient(135deg, rgba(10, 6, 20, 0.98) 0%, rgba(5, 3, 15, 0.99) 100%)', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
