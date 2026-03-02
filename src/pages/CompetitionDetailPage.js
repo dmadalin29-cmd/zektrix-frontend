@@ -422,11 +422,39 @@ const CompetitionDetailPage = () => {
                                                 <p className="text-xs text-muted-foreground text-center mb-3">
                                                     {isRomanian ? 'Metode de plată acceptate' : 'Accepted payment methods'}
                                                 </p>
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <img src="https://cdn.jsdelivr.net/gh/nicoverbruggen/payment-icons@master/svg/visa.svg" alt="Visa" className="h-6" />
-                                                    <img src="https://cdn.jsdelivr.net/gh/nicoverbruggen/payment-icons@master/svg/mastercard.svg" alt="Mastercard" className="h-6" />
-                                                    <img src="https://cdn.jsdelivr.net/gh/nicoverbruggen/payment-icons@master/svg/applepay.svg" alt="Apple Pay" className="h-6 bg-white rounded px-1" />
-                                                    <img src="https://cdn.jsdelivr.net/gh/nicoverbruggen/payment-icons@master/svg/googlepay.svg" alt="Google Pay" className="h-6 bg-white rounded px-1" />
+                                                <div className="flex items-center justify-center gap-4 flex-wrap">
+                                                    {/* Visa */}
+                                                    <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-8">
+                                                        <svg viewBox="0 0 50 16" className="h-4 w-auto">
+                                                            <path fill="#1A1F71" d="M19.13 15.09h-3.83l2.4-14.3h3.83l-2.4 14.3zM32.43 1.07c-.76-.28-1.95-.58-3.43-.58-3.78 0-6.45 1.95-6.47 4.73-.02 2.06 1.9 3.2 3.35 3.89 1.49.7 1.99 1.15 1.98 1.78-.01.96-1.19 1.4-2.29 1.4-1.53 0-2.34-.22-3.6-.75l-.49-.23-.54 3.2c.9.4 2.55.75 4.27.77 4.02 0 6.63-1.92 6.66-4.9.02-1.63-1-2.87-3.2-3.89-1.33-.66-2.15-1.1-2.14-1.77 0-.59.69-1.23 2.19-1.23 1.25-.02 2.15.26 2.85.55l.34.16.52-3.13zM39.71.79h-2.95c-.91 0-1.6.26-2 1.2l-5.65 13.1h4l.8-2.14h4.88l.46 2.14h3.54L39.71.79zm-4.64 9.66c.31-.82 1.52-3.99 1.52-3.99-.02.04.31-.83.51-1.37l.26 1.24s.73 3.42.88 4.12h-3.17z"/>
+                                                            <path fill="#1A1F71" d="M13.81.79L10.06 10.4l-.4-2c-.7-2.34-2.9-4.89-5.36-6.16l3.42 12.84h4.05l6.02-14.3h-3.98z"/>
+                                                            <path fill="#F9A533" d="M6.52.79H.56L.5 1.07c4.8 1.19 7.97 4.05 9.29 7.49l-1.34-6.58c-.23-.9-.9-1.17-1.93-1.19z"/>
+                                                        </svg>
+                                                    </div>
+                                                    {/* Mastercard */}
+                                                    <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-8">
+                                                        <svg viewBox="0 0 50 30" className="h-5 w-auto">
+                                                            <circle fill="#EB001B" cx="15" cy="15" r="15"/>
+                                                            <circle fill="#F79E1B" cx="35" cy="15" r="15"/>
+                                                            <path fill="#FF5F00" d="M25 4.68a15 15 0 0 0-5.2 11.32A15 15 0 0 0 25 27.32 15 15 0 0 0 30.2 16 15 15 0 0 0 25 4.68z"/>
+                                                        </svg>
+                                                    </div>
+                                                    {/* Apple Pay */}
+                                                    <div className="bg-black rounded px-2 py-1 flex items-center justify-center h-8">
+                                                        <svg viewBox="0 0 50 20" className="h-4 w-auto">
+                                                            <path fill="white" d="M9.6 5.39c-.6.73-1.54 1.3-2.47 1.22-.12-.93.34-1.92.87-2.53.6-.69 1.6-1.2 2.43-1.24.1.96-.28 1.9-.83 2.55zm.82 1.3c-1.37-.08-2.54.78-3.2.78-.66 0-1.66-.74-2.75-.72-1.42.02-2.73.82-3.46 2.1-1.48 2.55-.38 6.34 1.05 8.42.7 1.02 1.54 2.17 2.65 2.13 1.05-.04 1.46-.68 2.74-.68 1.28 0 1.65.68 2.76.66 1.14-.02 1.86-1.04 2.55-2.07.8-1.17 1.12-2.3 1.14-2.36-.02-.02-2.2-.85-2.22-3.36-.02-2.1 1.72-3.1 1.8-3.16-1-1.46-2.53-1.62-3.06-1.66v-.08zM21.88 2.8v14.66h2.27V12h3.14c2.86 0 4.88-1.96 4.88-4.62 0-2.66-1.98-4.58-4.8-4.58h-5.49zm2.27 1.9h2.62c1.97 0 3.09 1.05 3.09 2.68 0 1.64-1.12 2.7-3.1 2.7h-2.6V4.7z"/>
+                                                            <path fill="white" d="M37.3 17.58c1.42 0 2.74-.72 3.34-1.86h.04v1.74h2.1V9.73c0-2.12-1.68-3.48-4.28-3.48-2.4 0-4.18 1.38-4.24 3.28h2.04c.17-.9 1-1.5 2.12-1.5 1.38 0 2.14.64 2.14 1.82v.8l-2.8.16c-2.6.16-4.02 1.22-4.02 3.08 0 1.88 1.46 3.12 3.54 3.12v.57zm.58-1.74c-1.2 0-1.96-.58-1.96-1.46 0-.92.74-1.45 2.14-1.54l2.5-.16v.82c0 1.38-1.17 2.34-2.68 2.34zm7.38 5.86c2.22 0 3.26-.84 4.18-3.4l4-11.07h-2.32l-2.68 8.6h-.04l-2.68-8.6h-2.38l3.86 10.7-.2.66c-.34 1.12-.9 1.56-1.9 1.56-.18 0-.52-.02-.66-.04v1.74c.14.02.6.04.82.04v-.19z"/>
+                                                        </svg>
+                                                    </div>
+                                                    {/* Google Pay */}
+                                                    <div className="bg-white rounded px-2 py-1 flex items-center justify-center h-8">
+                                                        <svg viewBox="0 0 50 20" className="h-4 w-auto">
+                                                            <path fill="#4285F4" d="M23.75 10.18v3.28h7.83c-.23 1.46-.92 2.69-1.94 3.52l3.13 2.43c1.83-1.69 2.89-4.17 2.89-7.13 0-.69-.06-1.36-.17-2h-11.73v-.1z"/>
+                                                            <path fill="#34A853" d="M10.07 12.15l-.7.53-2.48 1.93c1.58 3.13 4.84 5.29 8.61 5.29 2.6 0 4.78-.86 6.38-2.33l-3.13-2.43c-.86.58-1.96.92-3.25.92-2.5 0-4.62-1.69-5.38-3.96l-.05.05z"/>
+                                                            <path fill="#FABB05" d="M6.89 7.39c-.36.71-.57 1.5-.57 2.33s.21 1.62.57 2.33l3.18-2.46c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72l-3.18-2.46v1.7z"/>
+                                                            <path fill="#E94235" d="M15.5 5.82c1.41 0 2.67.48 3.66 1.43l2.75-2.75C20.25 2.94 18.07 2 15.5 2c-3.77 0-7.03 2.16-8.61 5.29l3.18 2.46c.76-2.27 2.88-3.93 5.43-3.93z"/>
+                                                        </svg>
+                                                    </div>
                                                 </div>
                                             </div>
 

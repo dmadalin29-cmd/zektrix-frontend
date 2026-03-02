@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { Gift, Loader2, Clock, Sparkles } from 'lucide-react';
+import { Gift, Loader2, Clock, Sparkles, ArrowLeft, Home } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import confetti from 'canvas-confetti';
@@ -114,6 +115,14 @@ const LuckyWheelPage = () => {
     return (
         <div className="min-h-screen py-12 px-4">
             <div className="max-w-4xl mx-auto">
+                {/* Back Button */}
+                <div className="mb-6">
+                    <Link to="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors">
+                        <ArrowLeft className="w-5 h-5" />
+                        <span>{isRomanian ? 'Înapoi la Pagina Principală' : 'Back to Home'}</span>
+                    </Link>
+                </div>
+
                 {/* Header */}
                 <div className="text-center mb-12">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 mb-4">
@@ -125,7 +134,7 @@ const LuckyWheelPage = () => {
                     </h1>
                     <p className="text-muted-foreground text-lg">
                         {isRomanian 
-                            ? 'Învârte roata zilnic pentru șansa de a câștiga bani, bilete gratuite sau bonusuri!' 
+                            ? 'Învârte roata zilnic pentru șansa de a primi premii, bilete gratuite sau bonusuri!' 
                             : 'Spin the wheel daily for a chance to win cash, free tickets or bonuses!'}
                     </p>
                 </div>

@@ -282,7 +282,7 @@ const translations = {
         footer_contact: "Contact",
         footer_secure: "Plăți Securizate de Viva",
         footer_rights: "Toate drepturile rezervate.",
-        footer_responsible: "18+ | Te rugăm să joci responsabil | Intrare Poștală Gratuită Disponibilă",
+        footer_responsible: "18+ | Participare responsabilă | Intrare Poștală Gratuită Disponibilă",
 
         // Login
         welcome_login: "Bine ai venit",
@@ -647,7 +647,7 @@ const translations = {
         footer_contact: "Contact",
         footer_secure: "Secure Payments by Viva",
         footer_rights: "All rights reserved.",
-        footer_responsible: "18+ | Please gamble responsibly | Free Postal Entry Available",
+        footer_responsible: "18+ | Please participate responsibly | Free Postal Entry Available",
 
         // Login
         welcome_login: "Welcome",

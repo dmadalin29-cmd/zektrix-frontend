@@ -112,19 +112,19 @@ const LiveChat = () => {
 
     return (
         <>
-            {/* Chat Button */}
+            {/* Chat Button - More subtle */}
             <button
                 onClick={() => setIsOpen(true)}
-                className={`fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-r from-primary to-secondary shadow-lg flex items-center justify-center hover:scale-110 transition-transform ${isOpen ? 'hidden' : ''}`}
+                className={`fixed bottom-4 right-4 z-50 w-12 h-12 rounded-full bg-gradient-to-r from-primary to-secondary shadow-lg flex items-center justify-center hover:scale-105 transition-transform ${isOpen ? 'hidden' : ''}`}
                 data-testid="chat-btn"
             >
-                <MessageCircle className="w-6 h-6 text-white" />
-                <span className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-background"></span>
+                <MessageCircle className="w-5 h-5 text-white" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-background"></span>
             </button>
 
-            {/* Chat Window */}
+            {/* Chat Window - Smaller on mobile */}
             {isOpen && (
-                <div className="fixed bottom-6 right-6 z-50 w-[380px] h-[550px] bg-card border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div className="fixed bottom-4 right-4 z-50 w-[320px] sm:w-[360px] h-[450px] sm:h-[500px] bg-card border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden">
                     {/* Header */}
                     <div className="bg-gradient-to-r from-primary to-secondary p-4 flex items-center justify-between">
                         <div className="flex items-center gap-3">
