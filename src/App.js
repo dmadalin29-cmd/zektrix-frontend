@@ -27,6 +27,7 @@ const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
 const LuckyWheelPage = lazy(() => import("./pages/LuckyWheelPage"));
 const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage"));
 const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage"));
+const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage"));
 
 // Global Components
 import InstallPrompt from "./components/InstallPrompt";
@@ -94,6 +95,7 @@ const AppRouter = () => {
                 <Route path="/payment/success" element={<PaymentSuccessPage />} />
                 <Route path="/payment/failed" element={<PaymentFailedPage />} />
                 <Route path="/lucky-wheel" element={<LuckyWheelPage />} />
+                <Route path="/unsubscribe/:userId" element={<UnsubscribePage />} />
 
                 {/* Protected Routes */}
                 <Route
