@@ -97,7 +97,7 @@ const SearchTicketsPage = () => {
                                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400 z-10" />
                                 <Input
                                     type="text"
-                                    placeholder={t('enter_username')}
+                                    placeholder={isRomanian ? "Introdu username sau email" : "Enter username or email"}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                     className="pl-12 h-14 text-lg bg-white/5 border-white/10 rounded-xl focus:border-violet-500"

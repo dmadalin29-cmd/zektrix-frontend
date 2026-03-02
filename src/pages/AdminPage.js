@@ -894,15 +894,20 @@ const AdminPage = () => {
                                         }}
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="w-14 h-14 rounded-xl flex items-center justify-center font-mono font-bold text-lg"
+                                            <div className="w-16 h-16 rounded-xl flex flex-col items-center justify-center font-mono font-bold"
                                                 style={{ background: 'linear-gradient(135deg, #8b5cf6, #f97316)', boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)' }}>
-                                                #{t.ticket_number}
+                                                <span className="text-xs text-white/70">LOC</span>
+                                                <span className="text-xl text-white">#{t.ticket_number}</span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-white">{t.competition_title || t.competition_id}</p>
-                                                <p className="text-sm text-gray-500">{t.full_name || t.username} • {t.email || 'N/A'}</p>
+                                                <p className="font-bold text-white text-lg">{t.competition_title || t.competition_id}</p>
+                                                <p className="text-sm text-violet-400 font-medium">{t.full_name || t.username || 'Unknown'}</p>
+                                                <p className="text-xs text-gray-500">{t.email || 'N/A'} • {t.phone || 'Fara telefon'}</p>
                                             </div>
-                                            <p className="text-xs text-gray-500 hidden sm:block">{t.purchased_at ? new Date(t.purchased_at).toLocaleDateString('ro-RO') : 'N/A'}</p>
+                                            <div className="text-right">
+                                                <p className="text-sm text-gray-400">{t.purchased_at ? new Date(t.purchased_at).toLocaleDateString('ro-RO') : 'N/A'}</p>
+                                                <p className="text-xs text-gray-500">{t.purchased_at ? new Date(t.purchased_at).toLocaleTimeString('ro-RO', {hour: '2-digit', minute: '2-digit'}) : ''}</p>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
