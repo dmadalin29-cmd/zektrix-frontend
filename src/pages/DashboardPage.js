@@ -476,14 +476,15 @@ const DashboardPage = () => {
                                             <p className="text-sm text-gray-500">Secure card payments</p>
                                         </div>
                                     </div>
-                                    <div className="flex gap-4 mb-4">
-                                        <div className="flex-1 p-3 rounded-xl bg-white/5 text-center">
-                                            <svg viewBox="0 0 48 48" className="w-8 h-8 mx-auto mb-1"><rect fill="#1565C0" x="6" y="14" width="36" height="20" rx="3"/><path fill="#FFF" d="M22.2 24.5l-2.4-5.4h1.7l1.5 3.7 1.5-3.7h1.6l-2.4 5.4h-1.5zm-5.5 0h-1.5v-5.4h1.5v5.4zm11.7 0H27v-5.4h1.4v5.4zm2.5-4.1c0-.8.7-1.4 1.5-1.4.5 0 .9.2 1.2.5l-.6.8c-.2-.2-.4-.3-.6-.3-.4 0-.7.3-.7.7s.3.7.7.7c.2 0 .4-.1.6-.3l.6.8c-.3.3-.7.5-1.2.5-.8 0-1.5-.6-1.5-1.4v-.6z"/></svg>
-                                            <p className="text-[10px] text-gray-500">Visa</p>
+                                    <div className="flex gap-3 mb-4">
+                                        <div className="flex-1 p-3 rounded-xl bg-white text-center">
+                                            <span className="text-[#1A1F71] font-bold text-lg italic">VISA</span>
                                         </div>
-                                        <div className="flex-1 p-3 rounded-xl bg-white/5 text-center">
-                                            <svg viewBox="0 0 48 48" className="w-8 h-8 mx-auto mb-1"><circle fill="#FF9800" cx="20" cy="24" r="10"/><circle fill="#F44336" cx="28" cy="24" r="10"/><path fill="#FF5722" d="M24 17.3c2.3 1.8 3.8 4.5 3.8 7.7s-1.5 5.9-3.8 7.7c-2.3-1.8-3.8-4.5-3.8-7.7s1.5-5.9 3.8-7.7z"/></svg>
-                                            <p className="text-[10px] text-gray-500">Mastercard</p>
+                                        <div className="flex-1 p-3 rounded-xl bg-white flex items-center justify-center">
+                                            <div className="flex items-center">
+                                                <div className="w-6 h-6 rounded-full bg-[#EB001B]"></div>
+                                                <div className="w-6 h-6 rounded-full bg-[#F79E1B] -ml-2"></div>
+                                            </div>
                                         </div>
                                     </div>
                                     <p className="text-xs text-gray-500">
