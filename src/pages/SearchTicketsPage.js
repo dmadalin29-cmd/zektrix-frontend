@@ -83,13 +83,13 @@ const SearchTicketsPage = () => {
                         <CardContent className="p-6">
                             <form onSubmit={handleSearch} className="flex gap-4">
                                 <div className="relative flex-1">
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-violet-400 z-10" />
                                     <Input
                                         type="text"
                                         placeholder={t('enter_username')}
                                         value={username}
                                         onChange={(e) => setUsername(e.target.value)}
-                                        className="pl-12 input-modern h-14 text-lg"
+                                        className="pl-12 h-14 text-lg bg-white/5 border-white/10 rounded-xl focus:border-violet-500 text-white placeholder:text-gray-500"
                                         data-testid="search-username-input"
                                     />
                                 </div>
