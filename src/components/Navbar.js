@@ -1,13 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { Button } from '../components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '../components/ui/sheet';
-import { Menu, User, LogOut, LayoutDashboard, Wallet, Ticket, Shield, Globe, ShoppingCart } from 'lucide-react';
-import NotificationBell from './NotificationBell';
+import { Sheet, SheetContent, SheetTrigger, SheetClose } from '../components/ui/sheet';
+import { Menu, User, LogOut, LayoutDashboard, Wallet, Ticket, Shield, ShoppingCart, ChevronDown, X } from 'lucide-react';
 
 // TikTok Icon Component
 const TikTokIcon = ({ className }) => (
@@ -18,264 +17,282 @@ const TikTokIcon = ({ className }) => (
 
 const Navbar = () => {
     const { user, isAuthenticated, isAdmin, logout } = useAuth();
-    const { t, language, toggleLanguage } = useLanguage();
+    const { t, language, toggleLanguage, isRomanian } = useLanguage();
     const { totalItems } = useCart();
     const location = useLocation();
 
     const navLinks = [
-        { href: '/competitions', label: t('nav_competitions') },
-        { href: '/lucky-wheel', label: '🎰 Roata' },
-        { href: '/winners', label: t('nav_winners') },
-        { href: '/search', label: t('nav_find_tickets') },
-        { href: '/faq', label: t('nav_faq') },
+        { href: '/competitions', label: isRomanian ? 'Competiții' : 'Competitions', icon: '🎯' },
+        { href: '/lucky-wheel', label: isRomanian ? 'Roata' : 'Wheel', icon: '🎰' },
+        { href: '/winners', label: isRomanian ? 'Premianți' : 'Winners', icon: '🏆' },
+        { href: '/search', label: isRomanian ? 'Caută Bilete' : 'Find Tickets', icon: '🔍' },
+        { href: '/faq', label: isRomanian ? 'Întrebări' : 'FAQ', icon: '❓' },
     ];
 
     const isActive = (path) => location.pathname === path;
 
     return (
-        <nav className="nav-floating">
-            <div className="flex items-center justify-between">
-                {/* Logo */}
-                <Link to="/" className="flex items-center gap-2" data-testid="navbar-logo">
-                    <span className="text-xl font-black tracking-tighter">
-                        <span className="gradient-text">ZEKTRIX</span>
-                        <span className="text-white">.UK</span>
-                    </span>
-                </Link>
-
-                {/* Desktop Navigation */}
-                <div className="hidden md:flex items-center gap-6">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.href}
-                            to={link.href}
-                            className={`text-sm font-medium transition-colors hover:text-primary ${
-                                isActive(link.href) ? 'text-primary' : 'text-muted-foreground'
-                            }`}
-                            data-testid={`nav-link-${link.href.replace('/', '')}`}
-                        >
-                            {link.label}
-                        </Link>
-                    ))}
-                    
-                    {/* TikTok Link */}
-                    <a
-                        href="https://www.tiktok.com/@x67digital.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-                        data-testid="tiktok-link"
-                    >
-                        <TikTokIcon className="w-4 h-4" />
-                        <span>@x67digital.com</span>
-                    </a>
-                </div>
-
-                {/* Right Side */}
-                <div className="flex items-center gap-2">
-                    {/* TikTok Link Mobile */}
-                    <a
-                        href="https://www.tiktok.com/@x67digital.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="md:hidden"
-                        data-testid="tiktok-link-mobile"
-                    >
-                        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary">
-                            <TikTokIcon className="w-5 h-5" />
-                        </Button>
-                    </a>
-                    
-                    {/* Language Toggle */}
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={toggleLanguage}
-                        className="flex items-center gap-1.5 text-muted-foreground hover:text-white px-2"
-                        data-testid="language-toggle"
-                    >
-                        <Globe className="w-4 h-4" />
-                        <span className="text-xs font-bold">{language === 'ro' ? 'RO' : 'EN'}</span>
-                    </Button>
-
-                    {/* Cart Button */}
-                    <Link to="/cart" className="relative" data-testid="cart-btn">
-                        <Button variant="ghost" size="icon" className="relative">
-                            <ShoppingCart className="w-5 h-5" />
-                            {totalItems > 0 && (
-                                <span className="cart-badge">{totalItems}</span>
-                            )}
-                        </Button>
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0a0614]/95 backdrop-blur-md border-b border-white/5">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                <div className="flex items-center justify-between h-16">
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center" data-testid="navbar-logo">
+                        <span className="text-xl font-black tracking-tight">
+                            <span className="text-primary">ZEKTRIX</span>
+                            <span className="text-white">.UK</span>
+                        </span>
                     </Link>
 
-                    {/* Notification Bell */}
-                    <NotificationBell />
-
-                    {isAuthenticated ? (
-                        <>
-                            {/* Wallet Balance */}
-                            <Link to="/dashboard" className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-secondary/30 hover:bg-secondary/20 transition-colors" data-testid="wallet-balance-btn">
-                                <Wallet className="w-4 h-4 text-secondary" />
-                                <span className="text-sm font-bold font-mono text-secondary">RON {(user?.balance || 0).toFixed(2)}</span>
+                    {/* Desktop Navigation - Center */}
+                    <div className="hidden lg:flex items-center gap-1">
+                        {navLinks.map((link) => (
+                            <Link
+                                key={link.href}
+                                to={link.href}
+                                className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                                    isActive(link.href) 
+                                        ? 'bg-primary/10 text-primary' 
+                                        : 'text-gray-300 hover:text-white hover:bg-white/5'
+                                }`}
+                                data-testid={`nav-link-${link.href.replace('/', '')}`}
+                            >
+                                <span>{link.icon}</span>
+                                <span>{link.label}</span>
                             </Link>
+                        ))}
+                        
+                        {/* TikTok Link */}
+                        <a
+                            href="https://www.tiktok.com/@x67digital.com"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/5 transition-all"
+                            data-testid="tiktok-link"
+                        >
+                            <TikTokIcon className="w-4 h-4" />
+                        </a>
+                    </div>
 
-                            {/* User Menu */}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="relative h-9 w-9 rounded-full border border-white/10" data-testid="user-menu-btn">
-                                        {user?.picture ? (
-                                            <img src={user.picture} alt={user.username} className="h-full w-full rounded-full object-cover" />
-                                        ) : (
-                                            <User className="h-4 w-4" />
-                                        )}
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent className="w-56" align="end">
-                                    <div className="px-2 py-1.5">
-                                        <p className="text-sm font-medium">{user?.username}</p>
-                                        <p className="text-xs text-muted-foreground">{user?.email}</p>
-                                    </div>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem asChild>
-                                        <Link to="/dashboard" className="flex items-center cursor-pointer" data-testid="menu-dashboard">
-                                            <LayoutDashboard className="mr-2 h-4 w-4" />
-                                            {t('nav_dashboard')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link to="/dashboard/tickets" className="flex items-center cursor-pointer" data-testid="menu-tickets">
-                                            <Ticket className="mr-2 h-4 w-4" />
-                                            {t('nav_my_tickets')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem asChild>
-                                        <Link to="/dashboard/wallet" className="flex items-center cursor-pointer" data-testid="menu-wallet">
-                                            <Wallet className="mr-2 h-4 w-4" />
-                                            {t('nav_wallet')}
-                                        </Link>
-                                    </DropdownMenuItem>
-                                    {isAdmin && (
-                                        <>
-                                            <DropdownMenuSeparator />
+                    {/* Right Side */}
+                    <div className="flex items-center gap-2">
+                        {/* Language Toggle */}
+                        <button
+                            onClick={toggleLanguage}
+                            className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all"
+                            data-testid="language-toggle"
+                        >
+                            <span className="w-5 h-5 rounded-full overflow-hidden flex items-center justify-center bg-white/10">
+                                {language === 'ro' ? '🇷🇴' : '🇬🇧'}
+                            </span>
+                            <span>{language.toUpperCase()}</span>
+                        </button>
+
+                        {/* Cart Button */}
+                        <Link to="/cart" className="relative" data-testid="cart-btn">
+                            <button className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all relative">
+                                <ShoppingCart className="w-5 h-5" />
+                                {totalItems > 0 && (
+                                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-primary text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                        {totalItems}
+                                    </span>
+                                )}
+                            </button>
+                        </Link>
+
+                        {isAuthenticated ? (
+                            <>
+                                {/* Wallet Balance - Clean style */}
+                                <Link 
+                                    to="/dashboard" 
+                                    className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all" 
+                                    data-testid="wallet-balance-btn"
+                                >
+                                    <Wallet className="w-4 h-4 text-emerald-400" />
+                                    <span className="text-sm font-bold text-emerald-400">RON {(user?.balance || 0).toFixed(2)}</span>
+                                </Link>
+
+                                {/* User Menu */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/5 transition-all" data-testid="user-menu-btn">
+                                            <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center overflow-hidden">
+                                                {user?.picture ? (
+                                                    <img src={user.picture} alt={user.username} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <User className="w-4 h-4 text-primary" />
+                                                )}
+                                            </div>
+                                            <ChevronDown className="w-4 h-4 text-gray-400 hidden sm:block" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-56 bg-[#1a1625] border-white/10" align="end">
+                                        <div className="px-3 py-2 border-b border-white/10">
+                                            <p className="text-sm font-medium text-white">{user?.username}</p>
+                                            <p className="text-xs text-gray-400">{user?.email}</p>
+                                        </div>
+                                        <div className="p-1">
                                             <DropdownMenuItem asChild>
-                                                <Link to="/admin" className="flex items-center cursor-pointer text-primary" data-testid="menu-admin">
-                                                    <Shield className="mr-2 h-4 w-4" />
-                                                    {t('nav_admin')}
+                                                <Link to="/dashboard" className="flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer hover:bg-white/5" data-testid="menu-dashboard">
+                                                    <LayoutDashboard className="w-4 h-4 text-gray-400" />
+                                                    <span>{t('nav_dashboard')}</span>
                                                 </Link>
                                             </DropdownMenuItem>
-                                        </>
-                                    )}
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={logout} className="cursor-pointer text-destructive" data-testid="menu-logout">
-                                        <LogOut className="mr-2 h-4 w-4" />
-                                        {t('nav_logout')}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login" className="hidden sm:block">
-                                <Button variant="ghost" className="text-muted-foreground hover:text-white text-sm" data-testid="nav-login-btn">
-                                    {t('nav_signin')}
-                                </Button>
-                            </Link>
-                            <Link to="/login">
-                                <Button className="btn-primary px-5 py-2 text-sm" data-testid="nav-signup-btn">
-                                    {t('nav_get_started')}
-                                </Button>
-                            </Link>
-                        </>
-                    )}
-
-                    {/* Mobile Menu */}
-                    <Sheet>
-                        <SheetTrigger asChild className="md:hidden">
-                            <Button variant="ghost" size="icon" className="relative" data-testid="mobile-menu-btn">
-                                <Menu className="h-6 w-6" />
-                            </Button>
-                        </SheetTrigger>
-                        <SheetContent side="right" className="w-full sm:w-[350px] p-0 border-l border-primary/20 bg-gradient-to-b from-background via-background to-primary/5">
-                            {/* Header */}
-                            <div className="p-6 border-b border-white/10">
-                                <div className="text-2xl font-black tracking-tighter">
-                                    <span className="gradient-text">ZEKTRIX</span>
-                                    <span className="text-white">.UK</span>
-                                </div>
-                            </div>
-                            
-                            {/* Navigation Links */}
-                            <div className="p-6 space-y-2">
-                                {navLinks.map((link) => (
-                                    <Link
-                                        key={link.href}
-                                        to={link.href}
-                                        className={`flex items-center gap-4 p-4 rounded-2xl transition-all duration-300 ${
-                                            isActive(link.href) 
-                                                ? 'bg-gradient-to-r from-primary/20 to-secondary/10 text-white border border-primary/30' 
-                                                : 'text-white/70 hover:bg-white/5 hover:text-white'
-                                        }`}
-                                    >
-                                        <span className="text-lg font-semibold">{link.label}</span>
-                                        {isActive(link.href) && <span className="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse" />}
-                                    </Link>
-                                ))}
-                                
-                                {/* TikTok Link */}
-                                <a
-                                    href="https://www.tiktok.com/@x67digital.com"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300"
-                                >
-                                    <TikTokIcon className="w-5 h-5" />
-                                    <span className="text-lg font-semibold">@x67digital.com</span>
-                                    <span className="ml-auto px-2 py-1 text-xs bg-secondary/20 text-secondary rounded-full">TikTok</span>
-                                </a>
-                                
-                                {/* Cart */}
-                                <Link to="/cart" className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300">
-                                    <ShoppingCart className="w-5 h-5" />
-                                    <span className="text-lg font-semibold">{t('nav_cart') || 'Coș'}</span>
-                                    {totalItems > 0 && (
-                                        <span className="ml-auto px-3 py-1 text-sm font-bold bg-gradient-to-r from-primary to-secondary rounded-full text-white">
-                                            {totalItems}
-                                        </span>
-                                    )}
+                                            <DropdownMenuItem asChild>
+                                                <Link to="/dashboard/tickets" className="flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer hover:bg-white/5" data-testid="menu-tickets">
+                                                    <Ticket className="w-4 h-4 text-gray-400" />
+                                                    <span>{t('nav_my_tickets')}</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem asChild>
+                                                <Link to="/dashboard/wallet" className="flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer hover:bg-white/5" data-testid="menu-wallet">
+                                                    <Wallet className="w-4 h-4 text-gray-400" />
+                                                    <span>{t('nav_wallet')}</span>
+                                                </Link>
+                                            </DropdownMenuItem>
+                                            {isAdmin && (
+                                                <DropdownMenuItem asChild>
+                                                    <Link to="/admin" className="flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer hover:bg-white/5 text-primary" data-testid="menu-admin">
+                                                        <Shield className="w-4 h-4" />
+                                                        <span>Admin</span>
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+                                        </div>
+                                        <div className="border-t border-white/10 p-1">
+                                            <DropdownMenuItem onClick={logout} className="flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer hover:bg-red-500/10 text-red-400" data-testid="menu-logout">
+                                                <LogOut className="w-4 h-4" />
+                                                <span>{t('nav_logout')}</span>
+                                            </DropdownMenuItem>
+                                        </div>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </>
+                        ) : (
+                            <div className="flex items-center gap-2">
+                                <Link to="/login">
+                                    <button className="hidden sm:block px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors" data-testid="nav-login-btn">
+                                        {isRomanian ? 'Conectare' : 'Login'}
+                                    </button>
+                                </Link>
+                                <Link to="/login">
+                                    <button className="px-4 py-2 bg-primary hover:bg-primary/90 text-white text-sm font-semibold rounded-lg transition-all" data-testid="nav-signup-btn">
+                                        {isRomanian ? 'Creează cont' : 'Sign Up'}
+                                    </button>
                                 </Link>
                             </div>
-                            
-                            {/* User Section */}
-                            {isAuthenticated && (
-                                <div className="p-6 border-t border-white/10">
-                                    <p className="text-xs text-white/40 uppercase tracking-wider mb-4">Contul meu</p>
-                                    <Link to="/dashboard" className="flex items-center gap-4 p-4 rounded-2xl text-white/70 hover:bg-white/5 hover:text-white transition-all duration-300">
-                                        <LayoutDashboard className="w-5 h-5" />
-                                        <span className="text-lg font-semibold">{t('nav_dashboard')}</span>
-                                    </Link>
-                                    {isAdmin && (
-                                        <Link to="/admin" className="flex items-center gap-4 p-4 rounded-2xl text-primary hover:bg-primary/10 transition-all duration-300">
-                                            <Shield className="w-5 h-5" />
-                                            <span className="text-lg font-semibold">{t('nav_admin')}</span>
-                                            <span className="ml-auto px-2 py-1 text-xs bg-primary/20 text-primary rounded-full">Admin</span>
-                                        </Link>
+                        )}
+
+                        {/* Mobile Menu */}
+                        <Sheet>
+                            <SheetTrigger asChild className="lg:hidden">
+                                <button className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-all" data-testid="mobile-menu-btn">
+                                    <Menu className="w-6 h-6" />
+                                </button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-full sm:w-[320px] p-0 border-l border-white/10 bg-[#0a0614]">
+                                {/* Mobile Header */}
+                                <div className="flex items-center justify-between p-4 border-b border-white/10">
+                                    <span className="text-lg font-black">
+                                        <span className="text-primary">ZEKTRIX</span>
+                                        <span className="text-white">.UK</span>
+                                    </span>
+                                    <SheetClose asChild>
+                                        <button className="p-2 rounded-lg hover:bg-white/5">
+                                            <X className="w-5 h-5" />
+                                        </button>
+                                    </SheetClose>
+                                </div>
+
+                                {/* Mobile User Info */}
+                                {isAuthenticated && (
+                                    <div className="p-4 border-b border-white/10 bg-white/5">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-12 h-12 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center">
+                                                {user?.picture ? (
+                                                    <img src={user.picture} alt="" className="w-full h-full rounded-full object-cover" />
+                                                ) : (
+                                                    <User className="w-6 h-6 text-primary" />
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-white">{user?.username}</p>
+                                                <p className="text-sm text-emerald-400 font-bold">RON {(user?.balance || 0).toFixed(2)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Mobile Navigation */}
+                                <div className="p-4 space-y-1">
+                                    {navLinks.map((link) => (
+                                        <SheetClose asChild key={link.href}>
+                                            <Link
+                                                to={link.href}
+                                                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                                                    isActive(link.href)
+                                                        ? 'bg-primary/10 text-primary'
+                                                        : 'text-gray-300 hover:bg-white/5'
+                                                }`}
+                                            >
+                                                <span className="text-lg">{link.icon}</span>
+                                                <span>{link.label}</span>
+                                            </Link>
+                                        </SheetClose>
+                                    ))}
+                                    
+                                    {isAuthenticated && (
+                                        <>
+                                            <div className="border-t border-white/10 my-3"></div>
+                                            <SheetClose asChild>
+                                                <Link to="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-300 hover:bg-white/5">
+                                                    <LayoutDashboard className="w-5 h-5" />
+                                                    <span>{t('nav_dashboard')}</span>
+                                                </Link>
+                                            </SheetClose>
+                                            {isAdmin && (
+                                                <SheetClose asChild>
+                                                    <Link to="/admin" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-primary hover:bg-primary/10">
+                                                        <Shield className="w-5 h-5" />
+                                                        <span>Admin Panel</span>
+                                                    </Link>
+                                                </SheetClose>
+                                            )}
+                                        </>
                                     )}
                                 </div>
-                            )}
-                            
-                            {/* Footer */}
-                            <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-white/10 bg-background/80 backdrop-blur-xl">
-                                <Button
-                                    variant="outline"
-                                    onClick={toggleLanguage}
-                                    className="w-full h-14 justify-center gap-3 rounded-2xl border-white/20 hover:bg-white/5 text-base font-semibold"
-                                >
-                                    <Globe className="w-5 h-5" />
-                                    {language === 'ro' ? '🇬🇧 English' : '🇷🇴 Română'}
-                                </Button>
-                            </div>
-                        </SheetContent>
-                    </Sheet>
+
+                                {/* Mobile Footer */}
+                                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-white/10">
+                                    {isAuthenticated ? (
+                                        <button
+                                            onClick={logout}
+                                            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 font-medium hover:bg-red-500/20 transition-all"
+                                        >
+                                            <LogOut className="w-5 h-5" />
+                                            <span>{t('nav_logout')}</span>
+                                        </button>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            <SheetClose asChild>
+                                                <Link to="/login" className="block">
+                                                    <button className="w-full px-4 py-3 rounded-xl bg-primary text-white font-semibold hover:bg-primary/90 transition-all">
+                                                        {isRomanian ? 'Creează cont' : 'Sign Up'}
+                                                    </button>
+                                                </Link>
+                                            </SheetClose>
+                                            <SheetClose asChild>
+                                                <Link to="/login" className="block">
+                                                    <button className="w-full px-4 py-3 rounded-xl border border-white/10 text-gray-300 font-medium hover:bg-white/5 transition-all">
+                                                        {isRomanian ? 'Conectare' : 'Login'}
+                                                    </button>
+                                                </Link>
+                                            </SheetClose>
+                                        </div>
+                                    )}
+                                </div>
+                            </SheetContent>
+                        </Sheet>
+                    </div>
                 </div>
             </div>
         </nav>
