@@ -153,7 +153,11 @@ const DashboardPage = () => {
     const [depositing, setDepositing] = useState(false);
     const [showDepositDialog, setShowDepositDialog] = useState(false);
 
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => { 
+        if (token) {
+            fetchData(); 
+        }
+    }, [token]);
     useEffect(() => { setActiveTab(getActiveTab()); }, [location.pathname]);
 
     const fetchData = async () => {
