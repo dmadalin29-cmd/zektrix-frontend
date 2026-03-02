@@ -6,35 +6,119 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import InstallPrompt from '../components/InstallPrompt';
 import CookieConsent from '../components/CookieConsent';
-import { Button } from '../components/ui/button';
-import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
-import { Progress } from '../components/ui/progress';
 import axios from 'axios';
-import { Zap, Trophy, Users, ArrowRight, Sparkles, Clock, Ticket, Star, Shield } from 'lucide-react';
+import { ArrowRight, Clock, Ticket, Zap, Search, ChevronRight, Trophy, Sparkles } from 'lucide-react';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
+
+// Competition Card Component - Clean style like EuroGiveaway
+const CompetitionCard = ({ competition, isRomanian }) => {
+    const progress = (competition.sold_tickets / competition.max_tickets) * 100;
+    const remaining = competition.max_tickets - competition.sold_tickets;
+    
+    return (
+        <Link 
+            to={`/competitions/${competition.competition_id}`}
+            className="group block bg-[#0d1117] rounded-2xl overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)]"
+            data-testid={`competition-card-${competition.competition_id}`}
+        >
+            {/* Image Container */}
+            <div className="relative aspect-[4/3] overflow-hidden">
+                <img 
+                    src={competition.image_url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600'} 
+                    alt={competition.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                
+                {/* Badges */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                    {competition.is_flash_sale && (
+                        <span className="px-2 py-1 bg-orange-500 text-white text-xs font-bold rounded-md flex items-center gap-1">
+                            <Zap className="w-3 h-3" /> FLASH
+                        </span>
+                    )}
+                    {competition.competition_type === 'instant' && (
+                        <span className="px-2 py-1 bg-emerald-500 text-white text-xs font-bold rounded-md">
+                            ACCES INSTANT
+                        </span>
+                    )}
+                    <span className="px-2 py-1 bg-primary/90 text-white text-xs font-bold rounded-md">
+                        AUTODRAW
+                    </span>
+                </div>
+                
+                {/* Price Badge */}
+                <div className="absolute bottom-3 left-3">
+                    <span className="px-3 py-1.5 bg-black/80 backdrop-blur-sm text-white text-sm font-bold rounded-lg">
+                        DE LA RON {competition.ticket_price?.toFixed(2)}
+                    </span>
+                </div>
+            </div>
+            
+            {/* Content */}
+            <div className="p-4">
+                {/* Title */}
+                <h3 className="font-bold text-white text-lg mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+                    {competition.title}
+                </h3>
+                
+                {/* Stats */}
+                <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
+                    <span>Vândute: {competition.sold_tickets?.toLocaleString()}</span>
+                    <span>•</span>
+                    <span>Ocupare: {progress.toFixed(0)}%</span>
+                    <span>•</span>
+                    <span className="text-emerald-400">Libere: {remaining?.toLocaleString()}</span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className="mb-4">
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                        <div 
+                            className="h-full bg-gradient-to-r from-primary to-emerald-500 rounded-full transition-all duration-500"
+                            style={{ width: `${Math.min(progress, 100)}%` }}
+                        />
+                    </div>
+                    <div className="flex justify-between mt-1.5 text-xs">
+                        <span className="text-gray-500">Ocupare: {progress.toFixed(0)}%</span>
+                        <span className="text-gray-500">Libere: {remaining?.toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                {/* Footer */}
+                <div className="flex items-center justify-between">
+                    <span className="px-3 py-1 bg-white/5 rounded-lg text-xs text-gray-400 capitalize">
+                        {competition.category || 'General'}
+                    </span>
+                    <button className="flex items-center gap-1 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg transition-colors">
+                        {isRomanian ? 'Participă' : 'Enter'}
+                        <ArrowRight className="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+        </Link>
+    );
+};
 
 const HomePage = () => {
     const { isAuthenticated } = useAuth();
     const { t, isRomanian } = useLanguage();
     const [competitions, setCompetitions] = useState([]);
-    const [winners, setWinners] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [liveStatus, setLiveStatus] = useState({ isLive: false, message: '' });
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [compsRes, winnersRes, liveRes] = await Promise.all([
-                    axios.get(`${API}/competitions?status=active`),
-                    axios.get(`${API}/winners`),
-                    axios.get(`${API}/settings/live-status`).catch(() => ({ data: { isLive: false } }))
-                ]);
-                setCompetitions(compsRes.data.slice(0, 6));
-                setWinners(winnersRes.data.slice(0, 4));
-                setLiveStatus(liveRes.data);
+                const compsRes = await axios.get(`${API}/competitions?status=active`);
+                setCompetitions(compsRes.data);
+                
+                // Extract unique categories
+                const cats = [...new Set(compsRes.data.map(c => c.category || 'other'))];
+                setCategories(cats);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             } finally {
@@ -44,332 +128,205 @@ const HomePage = () => {
         fetchData();
     }, []);
 
-    const getProgress = (sold, max) => (sold / max) * 100;
+    // Filter competitions by search
+    const filteredCompetitions = competitions.filter(c => 
+        c.title.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    // Get flash sales
+    const flashSales = competitions.filter(c => c.is_flash_sale);
+    
+    // Group by category
+    const getByCategory = (cat) => competitions.filter(c => (c.category || 'other') === cat);
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-[#030014]">
             <Navbar />
             
-            {/* Hero Section */}
-            <section className="relative hero-bg pt-32 pb-24 overflow-hidden">
-                {/* Background effects */}
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-primary/20 rounded-full blur-[120px]" />
-                    <div className="absolute bottom-0 right-0 w-[600px] h-[300px] bg-accent/15 rounded-full blur-[100px]" />
-                </div>
-
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                    <div className="text-center max-w-4xl mx-auto">
-                        <Badge className="badge-instant mb-6 animate-pulse-glow">
-                            <Sparkles className="w-3 h-3 mr-1" />
-                            {t('hero_badge')}
-                        </Badge>
-                        
-                        <h1 className="text-5xl md:text-7xl font-black tracking-tighter mb-6 leading-tight">
-                            {t('hero_title_1')} <span className="gradient-text">{t('hero_title_2')}</span><br />
-                            {t('hero_title_3')}
-                        </h1>
-                        
-                        <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                            {t('hero_subtitle')}
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link to="/competitions">
-                                <Button className="btn-primary text-lg px-10 py-6" data-testid="hero-cta-btn">
-                                    <Zap className="w-5 h-5 mr-2" />
-                                    {t('hero_enter_now')}
-                                    <ArrowRight className="w-5 h-5 ml-2" />
-                                </Button>
-                            </Link>
-                            <Link to="/winners">
-                                <Button variant="outline" className="border-white/20 hover:bg-white/5 text-lg px-10 py-6" data-testid="view-winners-btn">
-                                    <Trophy className="w-5 h-5 mr-2" />
-                                    {t('hero_view_winners')}
-                                </Button>
-                            </Link>
-                        </div>
-
-                        {/* Stats */}
-                        <div className="grid grid-cols-3 gap-8 mt-16 max-w-2xl mx-auto">
-                            <div className="text-center">
-                                <p className="text-3xl md:text-4xl font-black gradient-text">250K+</p>
-                                <p className="text-sm text-muted-foreground mt-1">{t('stat_prizes')}</p>
+            {/* Main Content - Starts right after navbar */}
+            <main className="pt-20">
+                {/* Category Header Bar */}
+                <div className="sticky top-16 z-40 bg-[#030014]/95 backdrop-blur-md border-b border-white/5">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <div className="flex items-center justify-between py-3">
+                            {/* Categories */}
+                            <div className="flex items-center gap-2 overflow-x-auto hide-scrollbar">
+                                <button className="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg whitespace-nowrap">
+                                    {isRomanian ? 'Toate' : 'All'}
+                                </button>
+                                {categories.slice(0, 5).map((cat) => (
+                                    <button 
+                                        key={cat}
+                                        className="px-4 py-2 bg-white/5 hover:bg-white/10 text-gray-300 text-sm font-medium rounded-lg whitespace-nowrap transition-colors capitalize"
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
                             </div>
-                            <div className="text-center">
-                                <p className="text-3xl md:text-4xl font-black gradient-text">1K+</p>
-                                <p className="text-sm text-muted-foreground mt-1">{t('stat_winners')}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-3xl md:text-4xl font-black gradient-text">24/7</p>
-                                <p className="text-sm text-muted-foreground mt-1">{t('stat_draws')}</p>
+                            
+                            {/* Search */}
+                            <div className="hidden sm:flex items-center gap-2 ml-4">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                                    <input
+                                        type="text"
+                                        placeholder={isRomanian ? 'Caută competiție...' : 'Search...'}
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:border-primary/50 w-48"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
 
-            {/* LIVE Section - TikTok - Dynamic */}
-            <section className={`py-12 border-y ${liveStatus.isLive ? 'bg-gradient-to-r from-red-500/20 via-primary/10 to-red-500/20 border-red-500/30' : 'bg-gradient-to-r from-primary/5 via-muted/10 to-primary/5 border-white/10'}`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="relative">
-                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${liveStatus.isLive ? 'bg-gradient-to-br from-red-500 to-primary animate-pulse-glow' : 'bg-muted/50'}`}>
-                                    <svg className={`w-8 h-8 ${liveStatus.isLive ? 'text-white' : 'text-muted-foreground'}`} viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                                    </svg>
+                {/* Flash Sales Section (if any) */}
+                {flashSales.length > 0 && (
+                    <section className="py-8 bg-gradient-to-r from-orange-500/10 to-red-500/10 border-b border-orange-500/20">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                                        <Zap className="w-5 h-5 text-orange-500" />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-xl font-bold text-white">⚡ Flash Sales</h2>
+                                        <p className="text-sm text-gray-400">{isRomanian ? 'Oferte limitate!' : 'Limited offers!'}</p>
+                                    </div>
                                 </div>
-                                {liveStatus.isLive && (
-                                    <>
-                                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full animate-ping" />
-                                        <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full" />
-                                    </>
-                                )}
+                                <Link to="/competitions?flash=true" className="text-orange-500 text-sm font-medium flex items-center gap-1 hover:underline">
+                                    {isRomanian ? 'Vezi toate' : 'View all'} <ChevronRight className="w-4 h-4" />
+                                </Link>
                             </div>
-                            <div>
-                                <div className="flex items-center gap-2 mb-1">
-                                    {liveStatus.isLive ? (
-                                        <span className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full uppercase animate-pulse">
-                                            🔴 LIVE
-                                        </span>
-                                    ) : (
-                                        <span className="px-3 py-1 bg-muted text-muted-foreground text-xs font-bold rounded-full uppercase">
-                                            OFFLINE
-                                        </span>
-                                    )}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {flashSales.slice(0, 4).map((comp) => (
+                                    <CompetitionCard key={comp.competition_id} competition={comp} isRomanian={isRomanian} />
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+                )}
+
+                {/* Main Competitions Grid */}
+                <section className="py-8">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        {/* Section Header */}
+                        <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                                    <Trophy className="w-5 h-5 text-primary" />
                                 </div>
-                                <h3 className="text-xl font-bold text-white">
-                                    {liveStatus.isLive 
-                                        ? (isRomanian ? 'Suntem LIVE!' : "We're LIVE!") 
-                                        : (isRomanian ? 'Offline - Revenim în curând!' : 'Offline - Back soon!')}
+                                <div>
+                                    <h2 className="text-xl font-bold text-white">
+                                        {isRomanian ? 'Competiții Active' : 'Active Competitions'}
+                                    </h2>
+                                    <p className="text-sm text-gray-400">
+                                        {filteredCompetitions.length} {isRomanian ? 'disponibile' : 'available'}
+                                    </p>
+                                </div>
+                            </div>
+                            <Link to="/competitions" className="text-primary text-sm font-medium flex items-center gap-1 hover:underline">
+                                {isRomanian ? 'Vezi toate' : 'View all'} <ChevronRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+
+                        {/* Loading State */}
+                        {loading ? (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                                    <div key={i} className="bg-[#0d1117] rounded-2xl overflow-hidden animate-pulse">
+                                        <div className="aspect-[4/3] bg-white/5" />
+                                        <div className="p-4 space-y-3">
+                                            <div className="h-5 bg-white/5 rounded w-3/4" />
+                                            <div className="h-4 bg-white/5 rounded w-full" />
+                                            <div className="h-2 bg-white/5 rounded w-full" />
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : filteredCompetitions.length === 0 ? (
+                            <div className="text-center py-16">
+                                <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                                    <Sparkles className="w-10 h-10 text-primary" />
+                                </div>
+                                <h3 className="text-xl font-bold text-white mb-2">
+                                    {isRomanian ? 'Nicio competiție găsită' : 'No competitions found'}
                                 </h3>
-                                <p className="text-sm text-muted-foreground">
-                                    {liveStatus.message || (liveStatus.isLive 
-                                        ? (isRomanian ? 'Urmărește-ne pe TikTok pentru extrageri și surprize' : 'Watch us on TikTok for draws and surprises')
-                                        : (isRomanian ? 'Urmărește-ne pe TikTok să fii notificat când revenim' : 'Follow us on TikTok to be notified when we return'))}
+                                <p className="text-gray-400">
+                                    {isRomanian ? 'Revino mai târziu pentru competiții noi!' : 'Check back later for new competitions!'}
                                 </p>
                             </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <a
-                                href="https://www.tiktok.com/@x67digital.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`flex items-center gap-2 text-sm px-6 py-3 rounded-full font-bold transition-all ${liveStatus.isLive ? 'btn-secondary text-black' : 'btn-outline'}`}
-                                data-testid="watch-live-btn"
-                            >
-                                <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
-                                </svg>
-                                {liveStatus.isLive 
-                                    ? (isRomanian ? 'Urmărește LIVE' : 'Watch LIVE') 
-                                    : (isRomanian ? 'Urmărește pe TikTok' : 'Follow on TikTok')}
-                            </a>
-                            <span className="text-white/70 text-sm font-medium">@x67digital.com</span>
-                        </div>
+                        ) : (
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                                {filteredCompetitions.map((comp) => (
+                                    <CompetitionCard key={comp.competition_id} competition={comp} isRomanian={isRomanian} />
+                                ))}
+                            </div>
+                        )}
                     </div>
-                </div>
-            </section>
+                </section>
 
-            {/* Featured Competitions */}
-            <section className="py-24 bg-background">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex items-center justify-between mb-12">
-                        <div>
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('section_live_competitions')}</h2>
-                            <p className="text-muted-foreground mt-2">{t('section_live_subtitle')}</p>
-                        </div>
-                        <Link to="/competitions">
-                            <Button variant="outline" className="border-white/20 hover:bg-white/5" data-testid="view-all-comps-btn">
-                                {t('view_all')}
-                                <ArrowRight className="w-4 h-4 ml-2" />
-                            </Button>
-                        </Link>
-                    </div>
-
-                    {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {[...Array(6)].map((_, i) => (
-                                <Card key={i} className="glass border-white/10">
-                                    <div className="aspect-[4/3] skeleton" />
-                                    <CardContent className="p-6">
-                                        <div className="skeleton h-6 w-3/4 mb-4" />
-                                        <div className="skeleton h-4 w-full mb-2" />
-                                        <div className="skeleton h-4 w-1/2" />
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-                    ) : competitions.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {competitions.map((comp) => (
-                                <Link key={comp.competition_id} to={`/competitions/${comp.competition_id}`}>
-                                    <Card className="glass border-white/10 card-hover overflow-hidden group" data-testid={`competition-card-${comp.competition_id}`}>
-                                        <div className="relative aspect-[4/3] overflow-hidden">
-                                            <img
-                                                src={comp.image_url || 'https://images.unsplash.com/photo-1669606072600-1a62d7f24873?q=80&w=800'}
-                                                alt={comp.title}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                            />
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                            <Badge className={`absolute top-4 left-4 ${comp.competition_type === 'instant_win' ? 'badge-instant' : 'badge-classic'}`}>
-                                                {comp.competition_type === 'instant_win' ? (
-                                                    <><Zap className="w-3 h-3 mr-1" /> {t('badge_instant_win')}</>
-                                                ) : (
-                                                    <><Clock className="w-3 h-3 mr-1" /> {t('badge_classic')}</>
-                                                )}
-                                            </Badge>
-                                            <div className="absolute bottom-4 left-4 right-4">
-                                                <h3 className="text-xl font-bold mb-1">{comp.title}</h3>
-                                                <p className="text-sm text-white/70 line-clamp-1">{comp.description}</p>
-                                            </div>
-                                        </div>
-                                        <CardContent className="p-6">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <div>
-                                                    <p className="text-xs text-muted-foreground">{t('ticket_price')}</p>
-                                                    <p className="text-2xl font-bold text-primary">RON {comp.ticket_price.toFixed(2)}</p>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-xs text-muted-foreground">{t('tickets_left')}</p>
-                                                    <p className="text-lg font-bold">{comp.max_tickets - comp.sold_tickets}</p>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between text-xs text-muted-foreground">
-                                                    <span>{comp.sold_tickets} {t('tickets_sold')}</span>
-                                                    <span>{comp.max_tickets} {t('tickets_total')}</span>
-                                                </div>
-                                                <Progress value={getProgress(comp.sold_tickets, comp.max_tickets)} className="h-2" />
-                                            </div>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="text-center py-16">
-                            <Ticket className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                            <h3 className="text-xl font-bold mb-2">{t('no_competitions')}</h3>
-                            <p className="text-muted-foreground">{t('no_competitions_subtitle')}</p>
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* Recent Winners */}
-            {winners.length > 0 && (
-                <section className="py-24 bg-muted/30">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <div className="text-center mb-12">
-                            <Badge className="mb-4 bg-secondary/20 text-secondary border-secondary/30">
-                                <Trophy className="w-3 h-3 mr-1" /> {t('verified_winners')}
-                            </Badge>
-                            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('recent_winners')}</h2>
-                            <p className="text-muted-foreground mt-2">{t('recent_winners_subtitle')}</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            {winners.map((winner) => (
-                                <Card key={winner.winner_id} className="winner-card rounded-2xl overflow-hidden" data-testid={`winner-card-${winner.winner_id}`}>
-                                    <CardContent className="p-6 text-center">
-                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-secondary to-primary flex items-center justify-center mx-auto mb-4">
-                                            <Trophy className="w-8 h-8 text-white" />
-                                        </div>
-                                        <h4 className="font-bold text-lg mb-1">{winner.username}</h4>
-                                        <p className="text-sm text-muted-foreground mb-3">{winner.competition_title}</p>
-                                        <Badge className="badge-instant">
-                                            {t('ticket')} #{winner.ticket_number}
-                                        </Badge>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
-
-                        <div className="text-center mt-8">
-                            <Link to="/winners">
-                                <Button variant="outline" className="border-secondary/30 text-secondary hover:bg-secondary/10" data-testid="see-all-winners-btn">
-                                    {t('see_all_winners')}
-                                    <ArrowRight className="w-4 h-4 ml-2" />
-                                </Button>
-                            </Link>
+                {/* Stats Bar */}
+                <section className="py-8 bg-gradient-to-r from-primary/5 to-emerald-500/5 border-t border-b border-white/5">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                            <div className="text-center">
+                                <p className="text-3xl font-black text-primary">250K+</p>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Premii Oferite' : 'Prizes Given'}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-3xl font-black text-emerald-400">1K+</p>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Premianți' : 'Winners'}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-3xl font-black text-orange-400">24/7</p>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Extrageri Live' : 'Live Draws'}</p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-3xl font-black text-cyan-400">100%</p>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Transparent' : 'Transparent'}</p>
+                            </div>
                         </div>
                     </div>
                 </section>
-            )}
 
-            {/* How It Works */}
-            <section className="py-24 bg-background">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center mb-16">
-                        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">{t('how_it_works')}</h2>
-                        <p className="text-muted-foreground mt-2">{t('how_it_works_subtitle')}</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        {[
-                            { icon: Users, title: t('step_1_title'), desc: t('step_1_desc') },
-                            { icon: Ticket, title: t('step_2_title'), desc: t('step_2_desc') },
-                            { icon: Clock, title: t('step_3_title'), desc: t('step_3_desc') },
-                            { icon: Trophy, title: t('step_4_title'), desc: t('step_4_desc') }
-                        ].map((step, i) => (
-                            <div key={i} className="text-center">
-                                <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-4 relative">
-                                    <step.icon className="w-8 h-8 text-primary" />
-                                    <span className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center">
-                                        {i + 1}
-                                    </span>
-                                </div>
-                                <h3 className="font-bold text-lg mb-2">{step.title}</h3>
-                                <p className="text-sm text-muted-foreground">{step.desc}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Trust Badges */}
-            <section className="py-16 bg-muted/30">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                        {[
-                            { icon: Shield, text: t('trust_secure') },
-                            { icon: Star, text: t('trust_verified') },
-                            { icon: Users, text: t('trust_uk') },
-                            { icon: Zap, text: t('trust_instant') }
-                        ].map((badge, i) => (
-                            <div key={i} className="flex items-center justify-center gap-3">
-                                <badge.icon className="w-6 h-6 text-accent" />
-                                <span className="text-sm font-medium text-muted-foreground">{badge.text}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            {!isAuthenticated && (
-                <section className="py-24 relative overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-transparent to-accent/20" />
-                    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-                        <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-6">
-                            {t('cta_ready')} <span className="gradient-text">{t('cta_win_big')}</span>?
+                {/* How it Works - Minimal */}
+                <section className="py-12">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6">
+                        <h2 className="text-2xl font-bold text-white text-center mb-8">
+                            {isRomanian ? 'Cum Funcționează?' : 'How It Works?'}
                         </h2>
-                        <p className="text-lg text-muted-foreground mb-8">
-                            {t('cta_join')}
-                        </p>
-                        <Link to="/login">
-                            <Button className="btn-primary text-lg px-12 py-6" data-testid="cta-join-btn">
-                                {t('cta_start')}
-                                <ArrowRight className="w-5 h-5 ml-2" />
-                            </Button>
-                        </Link>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div className="text-center p-6 bg-white/5 rounded-2xl">
+                                <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl">1️⃣</span>
+                                </div>
+                                <h3 className="font-bold text-white mb-2">{isRomanian ? 'Alege Competiția' : 'Choose Competition'}</h3>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Răsfoiește competițiile și alege premiul dorit' : 'Browse competitions and choose your prize'}</p>
+                            </div>
+                            <div className="text-center p-6 bg-white/5 rounded-2xl">
+                                <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl">2️⃣</span>
+                                </div>
+                                <h3 className="font-bold text-white mb-2">{isRomanian ? 'Rezervă Bilete' : 'Get Tickets'}</h3>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Cumpără bilete și răspunde la întrebarea de calificare' : 'Buy tickets and answer the qualifying question'}</p>
+                            </div>
+                            <div className="text-center p-6 bg-white/5 rounded-2xl">
+                                <div className="w-14 h-14 rounded-full bg-orange-500/20 flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl">3️⃣</span>
+                                </div>
+                                <h3 className="font-bold text-white mb-2">{isRomanian ? 'Primește Premiul' : 'Win Prize'}</h3>
+                                <p className="text-sm text-gray-400">{isRomanian ? 'Extragere live și premiu livrat gratuit!' : 'Live draw and free prize delivery!'}</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
-            )}
+            </main>
 
             <Footer />
+            <InstallPrompt />
+            <CookieConsent />
         </div>
     );
 };
