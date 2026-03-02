@@ -195,35 +195,27 @@ const LuckyWheelPage = () => {
                                         }).join(', ')})`
                                     }}
                                 >
-                                    {/* Prize Labels - positioned in center of each segment */}
+                                    {/* Prize Labels - radial from center */}
                                     {prizes.map((prize, index) => {
                                         const segmentAngle = 360 / prizes.length;
-                                        const labelAngle = segmentAngle * index + segmentAngle / 2;
+                                        const labelAngle = segmentAngle * index + segmentAngle / 2 - 90; // -90 to start from top
+                                        const radius = 110; // Distance from center
+                                        const radians = (labelAngle * Math.PI) / 180;
+                                        const x = Math.cos(radians) * radius;
+                                        const y = Math.sin(radians) * radius;
                                         
                                         return (
                                             <div
                                                 key={index}
-                                                className="absolute"
+                                                className="absolute text-white text-[10px] md:text-xs font-bold whitespace-nowrap pointer-events-none"
                                                 style={{
-                                                    left: '50%',
-                                                    top: '50%',
-                                                    width: '1px',
-                                                    height: '1px',
-                                                    transform: `rotate(${labelAngle}deg)`,
-                                                    transformOrigin: 'center center'
+                                                    left: `calc(50% + ${x}px)`,
+                                                    top: `calc(50% + ${y}px)`,
+                                                    transform: `translate(-50%, -50%) rotate(${labelAngle + 90}deg)`,
+                                                    textShadow: '2px 2px 4px rgba(0,0,0,0.9), 0 0 8px rgba(0,0,0,0.7)'
                                                 }}
                                             >
-                                                <span 
-                                                    className="absolute text-white text-[8px] md:text-[10px] font-bold whitespace-nowrap"
-                                                    style={{
-                                                        left: '50%',
-                                                        top: '-95px',
-                                                        transform: 'translateX(-50%) rotate(0deg)',
-                                                        textShadow: '1px 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5)'
-                                                    }}
-                                                >
-                                                    {prize.label}
-                                                </span>
+                                                {prize.label}
                                             </div>
                                         );
                                     })}
