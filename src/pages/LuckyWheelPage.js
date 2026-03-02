@@ -198,24 +198,30 @@ const LuckyWheelPage = () => {
                                     {/* Prize Labels - positioned in center of each segment */}
                                     {prizes.map((prize, index) => {
                                         const segmentAngle = 360 / prizes.length;
-                                        // Label angle: center of segment, measured from top (0deg)
-                                        // Since conic-gradient starts from top and goes clockwise
                                         const labelAngle = segmentAngle * index + segmentAngle / 2;
                                         
                                         return (
                                             <div
                                                 key={index}
-                                                className="absolute text-white text-[9px] md:text-[11px] font-semibold"
+                                                className="absolute"
                                                 style={{
                                                     left: '50%',
                                                     top: '50%',
-                                                    transform: `rotate(${labelAngle}deg) translateY(-65px) md:translateY(-85px)`,
-                                                    transformOrigin: 'center center',
-                                                    textShadow: '1px 1px 3px rgba(0,0,0,0.7)',
-                                                    whiteSpace: 'nowrap'
+                                                    width: '1px',
+                                                    height: '1px',
+                                                    transform: `rotate(${labelAngle}deg)`,
+                                                    transformOrigin: 'center center'
                                                 }}
                                             >
-                                                <span style={{ display: 'inline-block', transform: 'translateX(-50%)' }}>
+                                                <span 
+                                                    className="absolute text-white text-[8px] md:text-[10px] font-bold whitespace-nowrap"
+                                                    style={{
+                                                        left: '50%',
+                                                        top: '-95px',
+                                                        transform: 'translateX(-50%) rotate(0deg)',
+                                                        textShadow: '1px 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5)'
+                                                    }}
+                                                >
                                                     {prize.label}
                                                 </span>
                                             </div>
